@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using OtokatariBackend.Services.Token;
+using XC.RSAUtil;
 
 namespace OtokatariBackend.Controllers
 {
@@ -13,20 +16,20 @@ namespace OtokatariBackend.Controllers
         private readonly IDistributedCache _cache;
         private readonly JwtManager jwt;
         private readonly TokenManager tokenManager;
+        private readonly RsaPkcs8Util RsaUtils;
 
-        public ValuesController(IDistributedCache cache,JwtManager jwtMgmr,TokenManager tokenMgmr)
+        public ValuesController(IDistributedCache cache,JwtManager jwtMgmr,TokenManager tokenMgmr, RsaPkcs8Util utils)
         {
             _cache = cache;
             jwt = jwtMgmr;
             tokenManager = tokenMgmr;
+            RsaUtils = utils;
         }
 
         [HttpGet("login")]
         [AllowAnonymous]
         public JsonResult Login([FromQuery] string user)
         {
-           // HttpContext.Authentication.SignInAsync()
-            
             return new JsonResult(jwt.Create(user));
         }
 
@@ -45,6 +48,12 @@ namespace OtokatariBackend.Controllers
         public ActionResult<string> SecretArea()
         {
             return "You are entered secret area";
+        }
+
+        [HttpPost("decrypt")]
+        public ActionResult<string> DecrpytRsa([FromForm] string Encrypted)
+        {
+            return RsaUtils.Decrypt(Encrypted, RSAEncryptionPadding.Pkcs1);
         }
     }
 }

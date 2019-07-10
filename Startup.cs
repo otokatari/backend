@@ -11,9 +11,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using OtokatariBackend.Model.Token;
-using OtokatariBackend.Persistence;
 using OtokatariBackend.Persistence.MongoDB.DependencyInjection;
+using OtokatariBackend.Persistence.MySQL.DAO;
 using OtokatariBackend.Services.Token;
+using OtokatariBackend.Utils;
 
 namespace OtokatariBackend
 {
@@ -51,6 +52,10 @@ namespace OtokatariBackend
             services.Configure<MongoClientConfiguration>(Configuration.GetSection("Mongo"));
             services.AddMongoDB();
             services.AddDbContext<OtokatariContext>(cfg => cfg.UseMySQL(Configuration["MySQL:ConnectionString"]));
+
+            // Configure RSA utils
+            services.Configure<RSAKeyFiles>(Configuration.GetSection("RsaKeys"));
+            services.AddRsaUtils();
 
             // Configure access controller.
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)//配置JWT服务

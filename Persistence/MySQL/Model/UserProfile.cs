@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace OtokatariBackend.Persistence
+namespace OtokatariBackend.Persistence.MySQL.Model
 {
     public partial class UserProfile
     {

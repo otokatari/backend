@@ -1,8 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using OtokatariBackend.Persistence.MySQL.Model;
 
-namespace OtokatariBackend.Persistence
+namespace OtokatariBackend.Persistence.MySQL.DAO
 {
     public partial class OtokatariContext : DbContext
     {

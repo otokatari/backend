@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace OtokatariBackend.Persistence
+namespace OtokatariBackend.Persistence.MySQL.Model
 {
     public partial class UserLogin
     {
