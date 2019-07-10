@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using OtokatariBackend.Model.Token;
+using OtokatariBackend.Persistence;
+using OtokatariBackend.Persistence.MongoDB.DependencyInjection;
 using OtokatariBackend.Services.Token;
 
 namespace OtokatariBackend
@@ -34,11 +37,22 @@ namespace OtokatariBackend
                     opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                     opt.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 });
+            // Configure HttpContextAccessor that can get http request & response context in filter.
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+
+            // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
             services.AddSingleton<JwtManager>();
             services.AddSingleton<TokenManager>();
 
+
+            // Configure databases connection.
+            services.Configure<MongoClientConfiguration>(Configuration.GetSection("Mongo"));
+            services.AddMongoDB();
+            services.AddDbContext<OtokatariContext>(cfg => cfg.UseMySQL(Configuration["MySQL:ConnectionString"]));
+
+            // Configure access controller.
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)//配置JWT服务
                .AddJwtBearer(options =>
                {
@@ -65,6 +79,7 @@ namespace OtokatariBackend
                        }
                    };
                });
+            // Configure redis cache to store revoked tokens.
             services.AddDistributedRedisCache(r =>
             {
                 r.Configuration = Configuration["Redis:ConnectionString"];
@@ -72,7 +87,8 @@ namespace OtokatariBackend
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 
+        // You can also specify middleware orders here.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())

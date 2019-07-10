@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace OtokatariBackend.Persistence
 {
-    public partial class otokatariContext : DbContext
+    public partial class OtokatariContext : DbContext
     {
-        public otokatariContext()
+        public OtokatariContext()
         {
         }
 
-        public otokatariContext(DbContextOptions<otokatariContext> options)
+        public OtokatariContext(DbContextOptions<OtokatariContext> options)
             : base(options)
         {
         }
@@ -23,8 +23,7 @@ namespace OtokatariBackend.Persistence
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySQL("server=110.64.88.125;port=9939;user=root;password=ibmbanking123.;database=otokatari");
+
             }
         }
 
