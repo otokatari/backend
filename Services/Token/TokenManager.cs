@@ -2,9 +2,8 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
-using OtokatariBackend.Model.Token;
+using OtokatariBackend.Model.DependencyInjection.Token;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
