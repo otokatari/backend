@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using OtokatariBackend.Model.Token;
 using OtokatariBackend.Services.Token;
 
 namespace OtokatariBackend.Controllers
@@ -28,16 +26,15 @@ namespace OtokatariBackend.Controllers
         public JsonResult Login([FromQuery] string user)
         {
            // HttpContext.Authentication.SignInAsync()
+            
             return new JsonResult(jwt.Create(user));
         }
-
 
         [HttpGet("revoke")]
         [Authorize]
         [ValidateJwtTokenActive]
         public async Task<ActionResult<string>> Revoke()
         {
-            
             await tokenManager.RevokeCurrentToken();
             return "Revoke token successfully!";
         }
