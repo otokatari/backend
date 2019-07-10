@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using OtokatariBackend.Model.DependencyInjection.Databases;
 using System;
 
 namespace OtokatariBackend.Persistence.MongoDB.DependencyInjection

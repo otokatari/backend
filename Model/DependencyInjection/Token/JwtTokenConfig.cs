@@ -1,4 +1,4 @@
-﻿namespace OtokatariBackend.Model.Token
+﻿namespace OtokatariBackend.Model.DependencyInjection.Token
 {
     public class JwtTokenConfig
     {

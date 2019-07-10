@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Persistence\MongoDB\Model\" />
     <Folder Include="RSAKeys\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>

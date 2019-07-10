@@ -3,17 +3,11 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OtokatariBackend.Model.DependencyInjection.RSAKey;
 using XC.RSAUtil;
 
 namespace OtokatariBackend.Utils
 {
-
-    public class RSAKeyFiles
-    {
-        public string PublicKey { get; set; }
-        public string PrivateKey { get; set; }
-
-    }
 
     public static class RSAUtilsDependencyInjection
     {
