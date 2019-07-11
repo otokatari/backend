@@ -66,5 +66,9 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             }
             return null;
         }
+
+        public UserProfile GetProfile(String id)
+            => _context.UserProfile.FirstOrDefault
+                (x => x.Userid == id);
     }
 }
