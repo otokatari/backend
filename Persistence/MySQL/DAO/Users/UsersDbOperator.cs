@@ -42,10 +42,15 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var NewUser = new UserLogin { Credentials = Credentials, Identifier = Identifier, Type = (byte)Type, Userid = _uid.NextId().ToString() };
+                var userid = _uid.NextId().ToString();
+                var NewUser = new UserLogin { Credentials = Credentials, Identifier = Identifier, Type = (byte)Type, Userid = userid };
                 _context.UserLogin.Add(NewUser);
+
+                var NewUserProfile = new UserProfile { Userid = userid,Nickname = $"新用户{userid.Substring(8)}" };
+                _context.UserProfile.Add(NewUserProfile);
+
                 int affects = await _context.SaveChangesAsync();
-                if (affects == 1)
+                if (affects == 2)
                 {
                     transaction.Commit();
                     return NewUser;
