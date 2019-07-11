@@ -5,7 +5,7 @@ namespace OtokatariBackend.Persistence.MySQL.Model
 {
     public partial class UserProfile
     {
-        public long Userid { get; set; }
+        public string Userid { get; set; }
         public byte Sex { get; set; }
         public string Nickname { get; set; }
         public string Country { get; set; }

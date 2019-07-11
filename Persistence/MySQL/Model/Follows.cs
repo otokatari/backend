@@ -5,7 +5,7 @@ namespace OtokatariBackend.Persistence.MySQL.Model
 {
     public partial class Follows
     {
-        public long Userid { get; set; }
-        public long FollowUserid { get; set; }
+        public string Userid { get; set; }
+        public string FollowUserid { get; set; }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 using OtokatariBackend.Persistence.MySQL.Model;
 
 namespace OtokatariBackend.Persistence.MySQL.DAO
@@ -41,12 +39,12 @@ namespace OtokatariBackend.Persistence.MySQL.DAO
 
                 entity.Property(e => e.Userid)
                     .HasColumnName("userid")
-                    .HasColumnType("bigint(20)")
+                    .HasColumnType("varchar(20)")
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.FollowUserid)
                     .HasColumnName("follow_userid")
-                    .HasColumnType("bigint(20)");
+                    .HasColumnType("varchar(20)");
             });
 
             modelBuilder.Entity<UserLogin>(entity =>
@@ -60,7 +58,7 @@ namespace OtokatariBackend.Persistence.MySQL.DAO
 
                 entity.Property(e => e.Userid)
                     .HasColumnName("userid")
-                    .HasColumnType("bigint(20)")
+                    .HasColumnType("varchar(20)")
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.Credentials)
@@ -87,7 +85,7 @@ namespace OtokatariBackend.Persistence.MySQL.DAO
 
                 entity.Property(e => e.Userid)
                     .HasColumnName("userid")
-                    .HasColumnType("bigint(20)")
+                    .HasColumnType("varchar(20)")
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.Avatar)

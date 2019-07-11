@@ -15,7 +15,9 @@ using OtokatariBackend.Model.DependencyInjection.RSAKey;
 using OtokatariBackend.Model.DependencyInjection.Token;
 using OtokatariBackend.Persistence.MongoDB.DependencyInjection;
 using OtokatariBackend.Persistence.MySQL.DAO;
+using OtokatariBackend.Services;
 using OtokatariBackend.Services.Token;
+using OtokatariBackend.Services.Users.UIDWorker;
 using OtokatariBackend.Utils;
 
 namespace OtokatariBackend
@@ -58,6 +60,12 @@ namespace OtokatariBackend
             // Configure RSA utils
             services.Configure<RSAKeyFiles>(Configuration.GetSection("RsaKeys"));
             services.AddRsaUtils();
+
+            // Configure services in the project.
+
+            services.AddSingleton<IdWorker>();
+            services.AddAllServices<IOtokatariService>();
+            services.AddAllServices<IOtokatariDbOperator>();
 
             // Configure access controller.
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)//配置JWT服务

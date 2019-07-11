@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OtokatariBackend.Services.Token
@@ -28,5 +29,6 @@ namespace OtokatariBackend.Services.Token
             }
             context.Result = new UnauthorizedResult();
         }
+
     }
 }
