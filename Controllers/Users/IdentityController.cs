@@ -1,6 +1,9 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OtokatariBackend.Model.Request.Users;
+using OtokatariBackend.Model.Response;
+using OtokatariBackend.Services.Token;
 using OtokatariBackend.Services.Users;
 
 namespace OtokatariBackend.Controllers.Users
@@ -10,9 +13,11 @@ namespace OtokatariBackend.Controllers.Users
     public class IdentityController : ControllerBase
     {
         private readonly IdentityService _identity;
-        public IdentityController(IdentityService identity)
+        private readonly TokenManager _token;
+        public IdentityController(IdentityService identity,TokenManager token)
         {
             _identity = identity;
+            _token = token;
 
         }
 
@@ -26,6 +31,14 @@ namespace OtokatariBackend.Controllers.Users
         public async Task<JsonResult> SignUp([FromBody] SignInRequest signup)
         {
             return new JsonResult(await _identity.SignUp(signup));
+        }
+
+        [HttpGet("logout")]
+        [Authorize]
+        public async Task<JsonResult> Signout()
+        {
+            await _token.RevokeCurrentToken();
+            return new JsonResult(new CommonResponse { StatusCode = 0 });
         }
     }
 }
