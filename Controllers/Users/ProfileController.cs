@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OtokatariBackend.Services.Token;
 using OtokatariBackend.Services.Users;
 
 namespace OtokatariBackend.Controllers.Users
@@ -17,12 +19,13 @@ namespace OtokatariBackend.Controllers.Users
         {
             _profile = profile;
         }
-
         [HttpGet("getprofile")]
-        public JsonResult Getprofile([FromBody] string givenid)
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public JsonResult Getprofile([FromQuery] string userid)
         {
-            string userid = User.Claims.ToList()[0].ToString();
-            return new JsonResult(_profile.Getprofile(givenid, userid));
+            string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
+            return new JsonResult(_profile.GetProfile(userid, ClaimsUserID));
         }
     }
 }
