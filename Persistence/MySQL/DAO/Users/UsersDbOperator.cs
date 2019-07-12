@@ -43,14 +43,20 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             try
             {
                 var userid = _uid.NextId().ToString();
+                // Add a new user login info.
                 var NewUser = new UserLogin { Credentials = Credentials, Identifier = Identifier, Type = (byte)Type, Userid = userid };
                 _context.UserLogin.Add(NewUser);
 
+                // Add a new blank user profile.
                 var NewUserProfile = new UserProfile { Userid = userid,Nickname = $"新用户{userid.Substring(8)}" };
                 _context.UserProfile.Add(NewUserProfile);
 
+                // Add a new user profile privacy configuration. default all profile fields are public.
+                var NewUserProfilePrivacyConfig = new UserProfilePrivacy { Userid = userid };
+                _context.UserProfilePrivacy.Add(NewUserProfilePrivacyConfig);
+
                 int affects = await _context.SaveChangesAsync();
-                if (affects == 2)
+                if (affects == 3)
                 {
                     transaction.Commit();
                     return NewUser;
@@ -67,8 +73,10 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             return null;
         }
 
-        public UserProfile GetProfile(String id)
+        public UserProfile GetProfile(string id)
             => _context.UserProfile.FirstOrDefault
                 (x => x.Userid == id);
+
+        public UserProfilePrivacy GetProfilePrivacy(string id) => _context.UserProfilePrivacy.FirstOrDefault(x => x.Userid == id);
     }
 }

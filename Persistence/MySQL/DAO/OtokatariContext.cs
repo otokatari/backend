@@ -17,6 +17,7 @@ namespace OtokatariBackend.Persistence.MySQL.DAO
         public virtual DbSet<Follows> Follows { get; set; }
         public virtual DbSet<UserLogin> UserLogin { get; set; }
         public virtual DbSet<UserProfile> UserProfile { get; set; }
+        public virtual DbSet<UserProfilePrivacy> UserProfilePrivacy { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -119,6 +120,50 @@ namespace OtokatariBackend.Persistence.MySQL.DAO
                 entity.Property(e => e.Signature)
                     .HasColumnName("signature")
                     .IsUnicode(false);
+            });
+
+
+            modelBuilder.Entity<UserProfilePrivacy>(entity =>
+            {
+                entity.HasKey(e => e.Userid);
+
+                entity.ToTable("user_profile_privacy", "otokatari");
+
+                entity.Property(e => e.Userid)
+                    .HasColumnName("userid")
+                    .HasMaxLength(20)
+                    .IsUnicode(false)
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.Birthday)
+                    .HasColumnName("birthday")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.City)
+                    .HasColumnName("city")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.Country)
+                    .HasColumnName("country")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.Moment)
+                    .HasColumnName("moment")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.Playlists)
+                    .HasColumnName("playlists")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("1");
+
+                entity.Property(e => e.Sex)
+                    .HasColumnName("sex")
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValueSql("1");
             });
         }
     }

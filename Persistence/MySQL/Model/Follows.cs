@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace OtokatariBackend.Persistence.MySQL.Model
+﻿namespace OtokatariBackend.Persistence.MySQL.Model
 {
     public partial class Follows
     {
