@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Persistence\MongoDB\Model\" />
+    <Folder Include="Persistence\MongoDB\DAO\Tracking\" />
+    <Folder Include="Persistence\MongoDB\DAO\Users\" />
     <Folder Include="RSAKeys\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>

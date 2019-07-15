@@ -13,6 +13,7 @@ using Newtonsoft.Json.Serialization;
 using OtokatariBackend.Model.DependencyInjection.Databases;
 using OtokatariBackend.Model.DependencyInjection.RSAKey;
 using OtokatariBackend.Model.DependencyInjection.Token;
+using OtokatariBackend.Persistence.MongoDB.DAO;
 using OtokatariBackend.Persistence.MongoDB.DependencyInjection;
 using OtokatariBackend.Persistence.MySQL.DAO;
 using OtokatariBackend.Services;
@@ -55,8 +56,9 @@ namespace OtokatariBackend
             // Configure databases connection.
             services.Configure<MongoClientConfiguration>(Configuration.GetSection("Mongo"));
             services.AddMongoDB();
+            services.AddScoped<MongoContext>();
             services.AddDbContext<OtokatariContext>(cfg => cfg.UseMySQL(Configuration["MySQL:ConnectionString"]));
-
+            
             // Configure RSA utils
             services.Configure<RSAKeyFiles>(Configuration.GetSection("RsaKeys"));
             services.AddRsaUtils();

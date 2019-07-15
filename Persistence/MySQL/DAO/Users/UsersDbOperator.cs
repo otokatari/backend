@@ -78,5 +78,27 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
                 (x => x.Userid == id);
 
         public UserProfilePrivacy GetProfilePrivacy(string id) => _context.UserProfilePrivacy.FirstOrDefault(x => x.Userid == id);
+
+        public async Task<bool> UpdateUserProfile(UserProfile profile)
+        {
+            var trans = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.UserProfile.Update(profile);
+                if(1 == await _context.SaveChangesAsync())
+                {
+                    trans.Commit();
+                    return true;
+                }
+                trans.Rollback();
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Database update mistake! {e.Message}");
+                trans.Rollback();
+            }
+            return false;
+        }
     }
 }

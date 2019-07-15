@@ -6,13 +6,13 @@ using System;
 
 namespace OtokatariBackend.Persistence.MongoDB.DependencyInjection
 {
-    public static class MongoClientContext
+    public static class MongoClientContextExtension
     {
         public static IServiceCollection AddMongoDB(this IServiceCollection services,Action<MongoClientConfiguration> configure)
         {
             var config = new MongoClientConfiguration();
-            configure(config);
-            return services.AddSingleton(_ => new MongoClient(config.ConnectionString).GetDatabase(config.Database));
+            var client = new MongoClient(config.ConnectionString);
+            return services.AddSingleton(_ => client).AddSingleton(client.GetDatabase(config.Database));
         }
 
         public static IServiceCollection AddMongoDB(this IServiceCollection services)
@@ -20,7 +20,9 @@ namespace OtokatariBackend.Persistence.MongoDB.DependencyInjection
             var config = services.BuildServiceProvider()
                                  .GetRequiredService<IOptions<MongoClientConfiguration>>()
                                  .Value;
-            return services.AddSingleton(_ => new MongoClient(config.ConnectionString).GetDatabase(config.Database));
+            var client = new MongoClient(config.ConnectionString);
+            return services.AddSingleton(_ => client).AddSingleton(client.GetDatabase(config.Database));
         }
     }
+
 }

@@ -1,10 +1,13 @@
 
+using OtokatariBackend.Model.Response;
 using OtokatariBackend.Persistence.MySQL.DAO.Users;
 using OtokatariBackend.Persistence.MySQL.Model;
+using OtokatariBackend.Utils.TypeMerger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OtokatariBackend.Services.Users
 {
@@ -27,6 +30,18 @@ namespace OtokatariBackend.Services.Users
             {
                 return QueryUserID == ClaimsUserID ? user : ApplyPrivacyToUserProfile(user, _users.GetProfilePrivacy(user.Userid));
             }
+        }
+
+        public async Task<CommonResponse> ModifyProfile(string UserID,UserProfile NewProfile)
+        {
+            var user = _users.GetProfile(UserID);
+            if(user != null)
+            {
+                var merged = TypeMerger.MergeProperties(user, NewProfile, "Userid");
+                if (await _users.UpdateUserProfile(merged)) return new CommonResponse { StatusCode = 0 };
+                return new CommonResponse { StatusCode = -3 };
+            }
+            return new CommonResponse { StatusCode = -2 };
         }
 
         private UserProfile ApplyPrivacyToUserProfile(UserProfile profile,UserProfilePrivacy privacy)

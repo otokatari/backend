@@ -3,8 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using OtokatariBackend.Persistence.MongoDB.DAO;
 using OtokatariBackend.Services.Token;
 using XC.RSAUtil;
+using System.Linq;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace OtokatariBackend.Controllers
 {
@@ -16,13 +20,19 @@ namespace OtokatariBackend.Controllers
         private readonly JwtManager jwt;
         private readonly TokenManager tokenManager;
         private readonly RsaPkcs8Util RsaUtils;
+        private readonly MongoContext ctx;
 
-        public ValuesController(IDistributedCache cache,JwtManager jwtMgmr,TokenManager tokenMgmr, RsaPkcs8Util utils)
+        public ValuesController(IDistributedCache cache,
+                                JwtManager jwtMgmr,
+                                TokenManager tokenMgmr, 
+                                RsaPkcs8Util utils,
+                                MongoContext mongoCtx)
         {
             _cache = cache;
             jwt = jwtMgmr;
             tokenManager = tokenMgmr;
             RsaUtils = utils;
+            ctx = mongoCtx;
         }
 
         [HttpGet("login")]
@@ -44,9 +54,9 @@ namespace OtokatariBackend.Controllers
         [HttpGet("secret")]
         [Authorize]
         [ValidateJwtTokenActive]
-        public ActionResult<string> SecretArea()
-        {
-            return "You are entered secret area";
+        public JsonResult SecretArea([FromQuery] string musicid)
+        {   
+            return new JsonResult(ctx.MusicComments.AsQueryable().FirstOrDefault(x => x.Musicid == musicid));   
         }
 
         [HttpPost("decrypt")]
