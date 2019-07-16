@@ -25,13 +25,7 @@ namespace OtokatariBackend.Services.Music
 
         public async Task<CommonResponse> AddSong(string UserId, ObjectId PlaylistId, SimpleMusic music)
         {
-            if (!await _musicLib.IfMusicExists(music.Musicid))
-            {
-                if (!await _musicLib.SaveNewMusicRecord(music.ToMusicLibrary()))
-                {
-                    return new CommonResponse { StatusCode = -3 };
-                }
-            }
+            _musicLib.AppendMusicToLibraryIfNotExist(music);
 
             var list = _playlist.QuerySelectedPlaylist(PlaylistId);
             if (list != null)

@@ -9,6 +9,10 @@ using XC.RSAUtil;
 using System.Linq;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using System.Threading;
+using OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary;
+using System;
+using OtokatariBackend.Persistence.MongoDB.Model;
 
 namespace OtokatariBackend.Controllers
 {
@@ -21,18 +25,21 @@ namespace OtokatariBackend.Controllers
         private readonly TokenManager tokenManager;
         private readonly RsaPkcs8Util RsaUtils;
         private readonly MongoContext ctx;
+        private readonly MusicLibraryOperator _music;
 
         public ValuesController(IDistributedCache cache,
                                 JwtManager jwtMgmr,
                                 TokenManager tokenMgmr, 
                                 RsaPkcs8Util utils,
-                                MongoContext mongoCtx)
+                                MongoContext mongoCtx,
+                                MusicLibraryOperator music)
         {
             _cache = cache;
             jwt = jwtMgmr;
             tokenManager = tokenMgmr;
             RsaUtils = utils;
             ctx = mongoCtx;
+            _music = music;
         }
 
         [HttpGet("login")]
@@ -51,18 +58,34 @@ namespace OtokatariBackend.Controllers
             return "Revoke token successfully!";
         }
 
-        [HttpGet("secret")]
-        [Authorize]
-        [ValidateJwtTokenActive]
-        public JsonResult SecretArea([FromQuery] string musicid)
-        {   
-            return new JsonResult(ctx.MusicComments.AsQueryable().FirstOrDefault(x => x.Musicid == musicid));   
-        }
-
-        [HttpPost("decrypt")]
-        public ActionResult<string> DecrpytRsa([FromForm] string Encrypted)
+        [HttpGet("concurrency")]
+        public ActionResult<string> Concurrency()
         {
-            return RsaUtils.Decrypt(Encrypted, RSAEncryptionPadding.Pkcs1);
+            var t1 = new Thread(() => 
+            {
+                Console.WriteLine($"1当前 {_music.GetHashCode()}");
+                _music.AppendMusicToLibraryIfNotExist(new SimpleMusic
+                {
+                    Musicid = "Hahaha666",
+                    Platform = "netease"
+                });
+            });
+            var t2 = new Thread(() =>
+            {
+                Console.WriteLine($"2当前 {_music.GetHashCode()}");
+                _music.AppendMusicToLibraryIfNotExist(new SimpleMusic
+                {
+                    Musicid = "Hahaha666",
+                    Platform = "netease"
+                });
+            });
+
+            t1.Start();
+            t2.Start();
+
+            t1.Join();
+            t2.Join();
+            return "OK!!!";
         }
     }
 }

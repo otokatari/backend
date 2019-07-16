@@ -3,8 +3,6 @@ using MongoDB.Driver;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using OtokatariBackend.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary
@@ -14,6 +12,7 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary
         private readonly MongoClient _client;
         private readonly MongoContext _context;
         private readonly ILogger<MusicLibraryOperator> _logger;
+        private readonly static object MusicLibraryLocker = new object();
 
         public MusicLibraryOperator(MongoClient client, MongoContext context, ILogger<MusicLibraryOperator> logger)
         {
@@ -22,30 +21,49 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary
             _logger = logger;
         }
 
-        public async Task<bool> SaveNewMusicRecord(SystemMusicLibrary musicLibrary)
+        public bool AppendMusicToLibraryIfNotExist(SimpleMusic music)
         {
-            //var trans = (await _client.StartStrictTransactionAsync());
-            //trans.StartTransaction();
+            lock (MusicLibraryLocker)
+            {
+                if (!IfMusicExists(music.Musicid))
+                {
+                    return SaveNewMusicRecord(music.ToMusicLibrary());
+                }
+                return true;
+            }
+        }
+
+        public async Task<bool> SaveNewMusicRecordAsync(SystemMusicLibrary musicLibrary)
+        {
             try
             {
                 await _context.SystemMusicLibrary.InsertOneAsync(musicLibrary);
-                if (musicLibrary.id != null)
-                {
-                    // await trans.CommitTransactionAsync();
-                    return true;
-                }
-                //await trans.AbortTransactionAsync();
-                return false;
+                return musicLibrary.id != null;
             }
             catch (Exception e)
             {
                 _logger.LogError($"Database update mistake! {e.Message}");
-                // await trans.AbortTransactionAsync();
             }
             return false;
         }
 
-        public async Task<bool> IfMusicExists(string Musicid)
-                                            => 0 < await _context.SystemMusicLibrary.CountDocumentsAsync(x => x.Musicid == Musicid);
+        public bool SaveNewMusicRecord(SystemMusicLibrary musicLibrary)
+        {
+            try
+            {
+                _context.SystemMusicLibrary.InsertOne(musicLibrary);
+                return musicLibrary.id != null;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Database update mistake! {e.Message}");
+            }
+            return false;
+        }
+
+        public bool IfMusicExists(string Musicid)
+        {
+            return 0 < _context.SystemMusicLibrary.CountDocuments(x => x.Musicid == Musicid);
+        }
     }
 }

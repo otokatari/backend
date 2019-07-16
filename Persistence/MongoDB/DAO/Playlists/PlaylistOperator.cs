@@ -41,7 +41,6 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.Playlist
                 var songList = list.Songs.ToList();
                 songList.Add(song);
 
-
                 var update = await _context.Playlists.UpdateOneAsync(new BsonDocument("_id", list._id),
                                                                      Builders<Playlists>.Update.Set("songs", songList));
                 if (update.ModifiedCount == 1)

@@ -7,16 +7,16 @@ namespace OtokatariBackend.Services
 {
     public static class ServiceConfiguration
     {
-        public static IServiceCollection AddAllServices<TServ>(this IServiceCollection services)
+        public static IServiceCollection AddAllServices<TServ>(this IServiceCollection services,bool IsSingleton = false)
         {
             AppDomain.CurrentDomain.GetAssemblies()
                         .SelectMany(assm => assm.GetTypes().Where(t => t.GetInterfaces().Contains(typeof(TServ))))
                         .Where(x => x.IsClass)
-                        .ForEachService(x => services.AddScoped(x));
+                        .ForEachService(x => IsSingleton ? services.AddSingleton(x) : services.AddScoped(x));
             return services;
         }
 
-        public static IEnumerable<T> ForEachService<T>(this IEnumerable<T> serv, Action<T> action) where T : Type
+        public static IEnumerable<T> ForEachService<T>(this IEnumerable<T> serv, Func<T,IServiceCollection> action) where T : Type
         {
             foreach (var item in serv)
             {

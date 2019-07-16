@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace OtokatariBackend.Persistence.MongoDB.Model
 {
@@ -18,6 +19,8 @@ namespace OtokatariBackend.Persistence.MongoDB.Model
         public int Time { get; set; }
 
         [BsonElement("music")]
+        [Required]
+        [BsonRequired]
         public SimpleMusic Music { get; set; }
 
         [BsonElement("isinplaylist")]
