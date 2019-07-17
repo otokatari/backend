@@ -57,7 +57,7 @@ namespace OtokatariBackend
             services.Configure<MongoClientConfiguration>(Configuration.GetSection("Mongo"));
             services.AddMongoDB();
             services.AddScoped<MongoContext>();
-            services.AddDbContext<OtokatariContext>(cfg => cfg.UseMySQL(Configuration["MySQL:ConnectionString"]));
+            services.AddDbContext<OtokatariContext>(cfg => cfg.UseMySQL(Configuration["MySQLConnection"]));
             
             // Configure RSA utils
             services.Configure<RSAKeyFiles>(Configuration.GetSection("RsaKeys"));
