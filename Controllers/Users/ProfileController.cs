@@ -13,6 +13,7 @@ using OtokatariBackend.Utils;
 using Microsoft.AspNetCore.WebUtilities;
 using System.IO;
 using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
 
 namespace OtokatariBackend.Controllers.Users
 {
@@ -21,12 +22,12 @@ namespace OtokatariBackend.Controllers.Users
     public class ProfileController : ControllerBase
     {
         private readonly ProfileService _profile;
-        private readonly StaticFilePathResovler _resovler;
+        private readonly StaticFilePathResovler _resolver;
 
         public ProfileController(ProfileService profile, IOptions<StaticFilePathResovler> resolver)
         {
             _profile = profile;
-            _resovler = resolver.Value;
+            _resolver = resolver.Value;
         }
 
         [HttpGet("getprofile")]
@@ -47,6 +48,17 @@ namespace OtokatariBackend.Controllers.Users
             if (userid != ClaimsUserID) return new JsonResult(new CommonResponse { StatusCode = -1 });
             return new JsonResult(await _profile.ModifyProfile(userid, profile));
         }
+
+        [HttpGet("getavatar")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public IActionResult GetAvatar([FromQuery][Required] string avatar)
+        {
+            var path = Path.Combine(_resolver.GetAvatar(),avatar);
+            var mime = $"image/{avatar.Split(".")[1]}";
+            return PhysicalFile(path,mime);
+        }
+        
 
         [HttpPost("changeavatar")]
         [Authorize]
@@ -89,7 +101,7 @@ namespace OtokatariBackend.Controllers.Users
 
                             fileExt = fileNamez[1];
 
-                            var path = Path.Combine(_resovler.GetAvatar(), $"{UserID}.{fileExt}");
+                            var path = Path.Combine(_resolver.GetAvatar(), $"{UserID}.{fileExt}");
                             using (var targetStream = System.IO.File.Create(path))
                             {
                                 await section.Body.CopyToAsync(targetStream);
