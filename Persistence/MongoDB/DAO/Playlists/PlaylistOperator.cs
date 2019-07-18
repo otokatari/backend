@@ -38,11 +38,8 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.Playlist
         {
             if (list != null)
             {
-                var songList = list.Songs.ToList();
-                songList.Add(song);
-
                 var update = await _context.Playlists.UpdateOneAsync(new BsonDocument("_id", list._id),
-                                                                     Builders<Playlists>.Update.Set("songs", songList));
+                                                  Builders<Playlists>.Update.Push("songs",song));
                 if (update.ModifiedCount == 1)
                 {
                     return true;
@@ -60,19 +57,14 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.Playlist
             {
                 if (Userid != list.Userid) return false; // 不允许删除别人的歌曲
 
-                var songList = list.Songs.SkipWhile(x => x.Musicid == Musicid);
+                var filterSongs = Builders<PlaylistMusic>.Filter.Eq(r => r.Musicid,Musicid);
+                var pull = Builders<Playlists>.Update.PullFilter(r => r.Songs,filterSongs);
 
-                // var trans = await _client.StartStrictTransactionAsync();
-                // trans.StartTransaction();
-
-                var update = await _context.Playlists.UpdateOneAsync(new BsonDocument("_id", PlaylistObjectId),
-                                                                     Builders<Playlists>.Update.Set("songs", songList));
+                var update = await _context.Playlists.UpdateOneAsync(new BsonDocument("_id", PlaylistObjectId),pull);
                 if (update.ModifiedCount == 1)
                 {
-                    //  await trans.CommitTransactionAsync();
                     return true;
                 }
-                // await trans.AbortTransactionAsync();
                 return false;
             }
             return false;
