@@ -1,18 +1,21 @@
-﻿using System.Security.Cryptography;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using OtokatariBackend.Persistence.MongoDB.DAO;
 using OtokatariBackend.Services.Token;
 using XC.RSAUtil;
-using System.Linq;
-using MongoDB.Driver;
-using MongoDB.Bson;
 using System.Threading;
 using OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary;
 using System;
 using OtokatariBackend.Persistence.MongoDB.Model;
+using OtokatariBackend.Services.FileUpload;
+using OtokatariBackend.Utils;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
+using System.IO;
+using System.Text;
+using System.Net.Http;
 
 namespace OtokatariBackend.Controllers
 {
@@ -27,65 +30,33 @@ namespace OtokatariBackend.Controllers
         private readonly MongoContext ctx;
         private readonly MusicLibraryOperator _music;
 
-        public ValuesController(IDistributedCache cache,
-                                JwtManager jwtMgmr,
-                                TokenManager tokenMgmr, 
-                                RsaPkcs8Util utils,
-                                MongoContext mongoCtx,
-                                MusicLibraryOperator music)
+        public ValuesController(IDistributedCache cache)
         {
-            _cache = cache;
-            jwt = jwtMgmr;
-            tokenManager = tokenMgmr;
-            RsaUtils = utils;
-            ctx = mongoCtx;
-            _music = music;
+
         }
 
-        [HttpGet("login")]
-        [AllowAnonymous]
-        public JsonResult Login([FromQuery] string user)
+        [HttpPost("tryupload")]
+        [DisableFormValueModelBinding]
+        public async Task<ActionResult<string>> TryUpload()
         {
-            return new JsonResult(jwt.Create(user));
-        }
+            // Used to accumulate all the form url encoded key value pairs in the 
+            // request.
 
-        [HttpGet("revoke")]
-        [Authorize]
-        [ValidateJwtTokenActive]
-        public async Task<ActionResult<string>> Revoke()
-        {
-            await tokenManager.RevokeCurrentToken();
-            return "Revoke token successfully!";
-        }
+            string targetFilePath = "/Users/cupdesk-mbp/CodeFiles/otokatari/avatar/relax.jpg";
 
-        [HttpGet("concurrency")]
-        public ActionResult<string> Concurrency()
-        {
-            var t1 = new Thread(() => 
+            var file = Request.Body;
+
+            if (file.CanRead)
             {
-                Console.WriteLine($"1当前 {_music.GetHashCode()}");
-                _music.AppendMusicToLibraryIfNotExist(new SimpleMusic
+                //  string fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim().ToString();
+                string fullPath = targetFilePath;
+                using (var stream = new FileStream(fullPath,FileMode.Create))
                 {
-                    Musicid = "Hahaha666",
-                    Platform = "netease"
-                });
-            });
-            var t2 = new Thread(() =>
-            {
-                Console.WriteLine($"2当前 {_music.GetHashCode()}");
-                _music.AppendMusicToLibraryIfNotExist(new SimpleMusic
-                {
-                    Musicid = "Hahaha666",
-                    Platform = "netease"
-                });
-            });
+                    await file.CopyToAsync(stream);
+                }
+            }
 
-            t1.Start();
-            t2.Start();
-
-            t1.Join();
-            t2.Join();
-            return "OK!!!";
+            return "OK!";
         }
     }
 }

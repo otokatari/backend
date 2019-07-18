@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -49,6 +50,8 @@ namespace OtokatariBackend
 
             // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
+            services.Configure<StaticFilePathResovler>(Configuration.GetSection("StaticFilesStorePath"));
+            
             services.AddSingleton<JwtManager>();
             services.AddSingleton<TokenManager>();
 
@@ -58,7 +61,7 @@ namespace OtokatariBackend
             services.AddMongoDB();
             services.AddScoped<MongoContext>();
             services.AddDbContext<OtokatariContext>(cfg => cfg.UseMySQL(Configuration["MySQLConnection"]));
-            
+
             // Configure RSA utils
             services.Configure<RSAKeyFiles>(Configuration.GetSection("RsaKeys"));
             services.AddRsaUtils();

@@ -13,6 +13,7 @@ namespace OtokatariBackend
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseKestrel(cfg => cfg.Limits.MaxRequestBodySize = 2 * 1024 * 1024 * 1000L)
                 .UseStartup<Startup>()
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
