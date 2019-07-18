@@ -59,15 +59,15 @@ namespace OtokatariBackend.Controllers.Users
             {
                 return new JsonResult(new CommonResponse { StatusCode = -1 }); // 没有在Header处声明Multipart/form-data.
             }
-
+            var UserID = User.Claims.ToList()[0].Value;
             try
             {
-                var UserID = User.Claims.ToList()[0].Value;
+
                 var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), 70);
 
                 var reader = new MultipartReader(boundary, Request.Body);
-
                 var section = await reader.ReadNextSectionAsync();
+                string fileExt = string.Empty;
                 while (section != null)
                 {
                     ContentDispositionHeaderValue contentDisposition;
@@ -87,11 +87,9 @@ namespace OtokatariBackend.Controllers.Users
                             var fileNamez = fileName.Split(".");
                             if (fileNamez.Length < 2) return new JsonResult(new CommonResponse() { StatusCode = -6 }); // fileName没有后缀
 
-                            var ext = fileNamez[1];
+                            fileExt = fileNamez[1];
 
-                            var file = Request.Body;
-
-                            var path = Path.Combine(_resovler.GetAvatar(), $"{UserID}.{ext}");
+                            var path = Path.Combine(_resovler.GetAvatar(), $"{UserID}.{fileExt}");
                             using (var targetStream = System.IO.File.Create(path))
                             {
                                 await section.Body.CopyToAsync(targetStream);
@@ -101,6 +99,11 @@ namespace OtokatariBackend.Controllers.Users
 
                     section = await reader.ReadNextSectionAsync();
                 }
+
+                var CurrentUserProfile = _profile.GetProfile(UserID, UserID);
+                CurrentUserProfile.Avatar = $"{UserID}.{fileExt}";
+                
+                return new JsonResult(await _profile.ModifyProfile(UserID,CurrentUserProfile));
             }
             catch (InvalidDataException exceed)
             {
@@ -113,7 +116,6 @@ namespace OtokatariBackend.Controllers.Users
                 return new JsonResult(new CommonResponse { StatusCode = -3 }); // 服务器发生未知错误
             }
 
-            return new JsonResult(new CommonResponse { StatusCode = 0 }); // 服务器发生未知错误
         }
     }
 }
