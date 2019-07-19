@@ -47,6 +47,7 @@ namespace OtokatariBackend
             // Configure HttpContextAccessor that can get http request & response context in filter.
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+            services.AddCors();
 
             // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
@@ -115,6 +116,7 @@ namespace OtokatariBackend
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors(x => x.AllowAnyOrigin());
             app.UseAuthentication();
             app.UseMvc();
         }

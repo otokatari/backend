@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.IO;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging;
 
 namespace OtokatariBackend.Controllers.Users
 {
@@ -24,10 +25,15 @@ namespace OtokatariBackend.Controllers.Users
         private readonly ProfileService _profile;
         private readonly StaticFilePathResovler _resolver;
 
-        public ProfileController(ProfileService profile, IOptions<StaticFilePathResovler> resolver)
+        private readonly ILogger<ProfileController> _logger;
+
+        public ProfileController(ProfileService profile, 
+                                IOptions<StaticFilePathResovler> resolver,
+                                ILogger<ProfileController> logger)
         {
             _profile = profile;
             _resolver = resolver.Value;
+            _logger = logger;
         }
 
         [HttpGet("getprofile")]
@@ -64,7 +70,7 @@ namespace OtokatariBackend.Controllers.Users
         [Authorize]
         [ValidateJwtTokenActive]
         [DisableFormValueModelBinding]
-        [RequestFormLimits(MultipartBodyLengthLimit = 2 * 1024 * 1000)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
         public async Task<JsonResult> UpdateAvatar()
         {
             if (!MultipartRequestHelper.IsMultipartContentType(HttpContext.Request.ContentType))
@@ -76,7 +82,6 @@ namespace OtokatariBackend.Controllers.Users
             {
 
                 var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), 70);
-
                 var reader = new MultipartReader(boundary, Request.Body);
                 var section = await reader.ReadNextSectionAsync();
                 string fileExt = string.Empty;
@@ -127,7 +132,6 @@ namespace OtokatariBackend.Controllers.Users
                 Console.WriteLine(e.Message); // 服务器的其他未知错误。
                 return new JsonResult(new CommonResponse { StatusCode = -3 }); // 服务器发生未知错误
             }
-
         }
     }
 }
