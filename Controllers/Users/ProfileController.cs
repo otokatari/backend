@@ -56,10 +56,10 @@ namespace OtokatariBackend.Controllers.Users
         [HttpPost("profileprivacy")]
         [Authorize]
         [ValidateJwtTokenActive]
-        public JsonResult UpdateProfilePrivacy([FromBody] UserProfilePrivacy updatedPrivacy)
+        public async Task<JsonResult> UpdateProfilePrivacy([FromBody] UserProfilePrivacy updatedPrivacy)
         {
             string UserID = User.Claims.ToList()[0].Value;
-            return new JsonResult(_profile.UpdateProfilePrivacy(UserID,updatedPrivacy));
+            return new JsonResult(await _profile.UpdateProfilePrivacy(UserID,updatedPrivacy));
         }
         
         [HttpPost("setprofile")]
