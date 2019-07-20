@@ -44,6 +44,21 @@ namespace OtokatariBackend.Services.Users
             return new CommonResponse { StatusCode = -2 };
         }
 
+        public UserProfilePrivacy GetProfilePrivacy(string QueryUserID) => _users.GetProfilePrivacy(QueryUserID);
+
+        public async Task<CommonResponse> UpdateProfilePrivacy(string QueryUserID, UserProfilePrivacy updatedPrivacy)
+        {
+            var oldPrivacy = GetProfilePrivacy(QueryUserID);
+            if (oldPrivacy != null)
+            {
+                var merged = TypeMerger.MergeProperties(oldPrivacy, updatedPrivacy, "Userid");
+                if (await _users.UpdateProfilePrivacy(merged))
+                    return new CommonResponse {StatusCode = 0};
+            }
+
+            return new CommonResponse {StatusCode = -1};
+        }
+
         private UserProfile ApplyPrivacyToUserProfile(UserProfile profile,UserProfilePrivacy privacy)
         {
             foreach (var item in ProfileProperties)

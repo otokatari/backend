@@ -44,7 +44,24 @@ namespace OtokatariBackend.Controllers.Users
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
             return new JsonResult(_profile.GetProfile(userid, ClaimsUserID));
         }
+        
+        [HttpGet("profileprivacy")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public JsonResult GetProfilePrivacy([FromQuery] string userid)
+        {
+            return new JsonResult(_profile.GetProfilePrivacy(userid));
+        }
 
+        [HttpPost("profileprivacy")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public JsonResult UpdateProfilePrivacy([FromBody] UserProfilePrivacy updatedPrivacy)
+        {
+            string UserID = User.Claims.ToList()[0].Value;
+            return new JsonResult(_profile.UpdateProfilePrivacy(UserID,updatedPrivacy));
+        }
+        
         [HttpPost("setprofile")]
         [Authorize]
         [ValidateJwtTokenActive]

@@ -100,5 +100,28 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             }
             return false;
         }
+
+
+        public async Task<bool> UpdateProfilePrivacy(UserProfilePrivacy privacy)
+        {
+            var tr = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.UserProfilePrivacy.Update(privacy);
+                if (1 == await _context.SaveChangesAsync())
+                {
+                    tr.Commit();
+                    return true;
+                }
+                tr.Rollback();
+                return false;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Database update mistake! {e.Message}");
+                tr.Rollback();
+            }
+            return false;
+        }
     }
 }
