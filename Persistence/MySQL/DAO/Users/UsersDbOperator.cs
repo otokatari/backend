@@ -21,7 +21,7 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
         private readonly OtokatariContext _context;
         private readonly ILogger<UsersDbOperator> _logger;
         private readonly IdWorker _uid;
-        public UsersDbOperator(OtokatariContext context, ILogger<UsersDbOperator> loggger,IdWorker uid)
+        public UsersDbOperator(OtokatariContext context, ILogger<UsersDbOperator> loggger, IdWorker uid)
         {
             _context = context;
             _logger = loggger;
@@ -29,12 +29,12 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
         }
 
         public UserLogin SignIn(string Identifier, string Credentials, int Type)
-            =>    _context.UserLogin.FirstOrDefault
+            => _context.UserLogin.FirstOrDefault
                   (x => x.Identifier == Identifier &&
                    x.Credentials == Credentials &&
                    x.Type == Type);
 
-        public async Task<UserLogin> SignUp(string Identifier,string Credentials,int Type)
+        public async Task<UserLogin> SignUp(string Identifier, string Credentials, int Type)
         {
             var ExistsUser = _context.UserLogin.FirstOrDefault(x => x.Identifier == Identifier && x.Type == Type);
             if (ExistsUser != null) return new UserLogin();
@@ -48,7 +48,7 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
                 _context.UserLogin.Add(NewUser);
 
                 // Add a new blank user profile.
-                var NewUserProfile = new UserProfile { Userid = userid,Nickname = $"新用户{userid.Substring(8)}" };
+                var NewUserProfile = new UserProfile { Userid = userid, Nickname = $"新用户{userid.Substring(8)}" };
                 _context.UserProfile.Add(NewUserProfile);
 
                 // Add a new user profile privacy configuration. default all profile fields are public.
@@ -77,7 +77,16 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             => _context.UserProfile.FirstOrDefault
                 (x => x.Userid == id);
 
+        public IQueryable<UserProfile> GetProfiles(IEnumerable<string> userids)
+        {
+            return _context.UserProfile.Where(x => userids.Contains(x.Userid));
+        }
+        public IQueryable<UserProfilePrivacy> GetProfilePrivacies(IEnumerable<string> userids)
+        {
+            return _context.UserProfilePrivacy.Where(x => userids.Contains(x.Userid));
+        }
         public UserProfilePrivacy GetProfilePrivacy(string id) => _context.UserProfilePrivacy.FirstOrDefault(x => x.Userid == id);
+
 
         public async Task<bool> UpdateUserProfile(UserProfile profile)
         {
@@ -85,7 +94,7 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
             try
             {
                 _context.UserProfile.Update(profile);
-                if(1 == await _context.SaveChangesAsync())
+                if (1 == await _context.SaveChangesAsync())
                 {
                     trans.Commit();
                     return true;

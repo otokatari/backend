@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using OtokatariBackend.Model.Response;
 using OtokatariBackend.Persistence.MongoDB.DAO.Sharing;
 using OtokatariBackend.Persistence.MongoDB.Model;
+using OtokatariBackend.Utils;
 
 namespace OtokatariBackend.Services.Music
 {
@@ -38,12 +39,14 @@ namespace OtokatariBackend.Services.Music
             comments._id = ObjectId.GenerateNewId();
             comments.Comments = new ReplyComments[0]; // 默认没有回复，避免客户端忘了初始化值。
             comments.Like = new string[0];
+            comments.Time = (int) DateUtil.NowToUnix();
             var result = await _sharing.CreateMusicSharingComment(Musicid, comments);
             return new CommonResponse { StatusCode = result ? 0 : -1 };
         }
 
         public async Task<CommonResponse> ReplySharingComment(string Musicid, string Commentid, ReplyComments comments)
         {
+            comments.Time = (int) DateUtil.NowToUnix();
             var result = await _sharing.ReplyMusicSharingComment(Musicid, ObjectId.Parse(Commentid), comments);
             return new CommonResponse { StatusCode = result ? 0 : -1 };
         }

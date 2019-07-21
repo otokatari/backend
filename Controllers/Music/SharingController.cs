@@ -41,8 +41,6 @@ namespace OtokatariBackend.Controllers.Music
          */
 
         [HttpGet("getcomments")]
-        [Authorize]
-        [ValidateJwtTokenActive]
         public async Task<JsonResult> GetMusicSharingComments([FromQuery] string musicid)
         {
             return new JsonResult(await _sharing.GetMusicSharingComments(musicid));

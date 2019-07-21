@@ -65,8 +65,8 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.Sharing
 
             var pusher = Builders<MusicComments>.Update.Push("comments.$[].comments",comments);
 
-            await _context.MusicComments.UpdateOneAsync(filters,pusher);
-            return comments._id != null;
+            var updated = await _context.MusicComments.UpdateOneAsync(filters,pusher);
+            return updated.ModifiedCount == 1;
         }
 
 

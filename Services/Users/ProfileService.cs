@@ -1,5 +1,6 @@
 
 using OtokatariBackend.Model.Response;
+using OtokatariBackend.Model.Response.Users;
 using OtokatariBackend.Persistence.MySQL.DAO.Users;
 using OtokatariBackend.Persistence.MySQL.Model;
 using OtokatariBackend.Utils.TypeMerger;
@@ -22,20 +23,32 @@ namespace OtokatariBackend.Services.Users
         {
             _users = user;
         }
-        public UserProfile GetProfile(string QueryUserID, string ClaimsUserID)
+
+        public IQueryable<UserProfile> GetProfileList(string selfUserid, IEnumerable<string> userids)
+        {
+            var profiles = _users.GetProfiles(userids);
+            var privacies = _users.GetProfilePrivacies(userids);
+            return profiles.Join(privacies,x => x.Userid,y => y.Userid,(x,y) => ApplyPrivacyToUserProfile(x,y,selfUserid == x.Userid));
+        }
+        public IQueryable<UserProfilePrivacy> GetProfilePrivacies(IEnumerable<string> userids)
+        {
+            return _users.GetProfilePrivacies(userids);
+        }
+        public CommonResponse GetProfile(string QueryUserID, string ClaimsUserID)
         {
             var user = _users.GetProfile(QueryUserID);
-            if (user == null) return null;
+            if (user == null) return new CommonResponse { StatusCode = -1};
             else
             {
-                return QueryUserID == ClaimsUserID ? user : ApplyPrivacyToUserProfile(user, _users.GetProfilePrivacy(user.Userid));
+                var applied = ApplyPrivacyToUserProfile(user, _users.GetProfilePrivacy(user.Userid),QueryUserID == ClaimsUserID);
+                return TypeMerger.MergeProperties(new GetprofileResponse { StatusCode = 0 },applied);
             }
         }
 
-        public async Task<CommonResponse> ModifyProfile(string UserID,UserProfile NewProfile)
+        public async Task<CommonResponse> ModifyProfile(string UserID, UserProfile NewProfile)
         {
             var user = _users.GetProfile(UserID);
-            if(user != null)
+            if (user != null)
             {
                 var merged = TypeMerger.MergeProperties(user, NewProfile, "Userid");
                 if (await _users.UpdateUserProfile(merged)) return new CommonResponse { StatusCode = 0 };
@@ -53,14 +66,15 @@ namespace OtokatariBackend.Services.Users
             {
                 var merged = TypeMerger.MergeProperties(oldPrivacy, updatedPrivacy, "Userid");
                 if (await _users.UpdateProfilePrivacy(merged))
-                    return new CommonResponse {StatusCode = 0};
+                    return new CommonResponse { StatusCode = 0 };
             }
 
-            return new CommonResponse {StatusCode = -1};
+            return new CommonResponse { StatusCode = -1 };
         }
 
-        private UserProfile ApplyPrivacyToUserProfile(UserProfile profile,UserProfilePrivacy privacy)
+        private UserProfile ApplyPrivacyToUserProfile(UserProfile profile, UserProfilePrivacy privacy, bool IsSelf = false)
         {
+            if (IsSelf) return profile;
             foreach (var item in ProfileProperties)
             {
                 var gate = ProfileGates.FirstOrDefault(x => x.Name == item.Name);

@@ -16,6 +16,9 @@ using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Cors;
+using OtokatariBackend.Model.Response.Users;
+using OtokatariBackend.Persistence.MySQL.DAO.Users;
+using OtokatariBackend.Model.Request;
 
 namespace OtokatariBackend.Controllers.Users
 {
@@ -24,17 +27,21 @@ namespace OtokatariBackend.Controllers.Users
     public class ProfileController : ControllerBase
     {
         private readonly ProfileService _profile;
+        private readonly UsersDbOperator _profDb;
+
         private readonly StaticFilePathResovler _resolver;
 
         private readonly ILogger<ProfileController> _logger;
 
-        public ProfileController(ProfileService profile, 
+        public ProfileController(ProfileService profile,
+                                UsersDbOperator profDb,
                                 IOptions<StaticFilePathResovler> resolver,
                                 ILogger<ProfileController> logger)
         {
             _profile = profile;
             _resolver = resolver.Value;
             _logger = logger;
+            _profDb = profDb;
         }
 
         [HttpGet("getprofile")]
@@ -45,7 +52,25 @@ namespace OtokatariBackend.Controllers.Users
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
             return new JsonResult(_profile.GetProfile(userid, ClaimsUserID));
         }
-        
+
+        [HttpGet("getprofilelist")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public JsonResult GetProfileList([FromBody] ProfileListRequest request)
+        {
+            string Userid = User.Claims.ToList()[0].Value;
+            return new JsonResult(_profile.GetProfileList(Userid, request.Userids.AsEnumerable()));
+        }
+
+        [HttpGet("profileprivacylist")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public JsonResult GetProfilePrivaciesList([FromBody] ProfileListRequest request)
+        {
+            return new JsonResult(_profile.GetProfilePrivacies(request.Userids.AsEnumerable()));
+
+        }
+
         [HttpGet("profileprivacy")]
         [Authorize]
         [ValidateJwtTokenActive]
@@ -60,9 +85,9 @@ namespace OtokatariBackend.Controllers.Users
         public async Task<JsonResult> UpdateProfilePrivacy([FromBody] UserProfilePrivacy updatedPrivacy)
         {
             string UserID = User.Claims.ToList()[0].Value;
-            return new JsonResult(await _profile.UpdateProfilePrivacy(UserID,updatedPrivacy));
+            return new JsonResult(await _profile.UpdateProfilePrivacy(UserID, updatedPrivacy));
         }
-        
+
         [HttpPost("setprofile")]
         [Authorize]
         [ValidateJwtTokenActive]
@@ -78,11 +103,11 @@ namespace OtokatariBackend.Controllers.Users
         [ValidateJwtTokenActive]
         public IActionResult GetAvatar([FromQuery][Required] string avatar)
         {
-            var path = Path.Combine(_resolver.GetAvatar(),avatar);
+            var path = Path.Combine(_resolver.GetAvatar(), avatar);
             var mime = $"image/{avatar.Split(".")[1]}";
-            return PhysicalFile(path,mime);
+            return PhysicalFile(path, mime);
         }
-        
+
 
         [HttpPost("changeavatar")]
         [Authorize]
@@ -135,10 +160,10 @@ namespace OtokatariBackend.Controllers.Users
                     section = await reader.ReadNextSectionAsync();
                 }
 
-                var CurrentUserProfile = _profile.GetProfile(UserID, UserID);
+                var CurrentUserProfile = _profDb.GetProfile(UserID);
                 CurrentUserProfile.Avatar = $"{UserID}.{fileExt}";
-                
-                return new JsonResult(await _profile.ModifyProfile(UserID,CurrentUserProfile));
+
+                return new JsonResult(await _profile.ModifyProfile(UserID, CurrentUserProfile));
             }
             catch (InvalidDataException exceed)
             {
