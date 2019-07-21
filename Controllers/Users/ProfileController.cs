@@ -15,9 +15,11 @@ using System.IO;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Cors;
 
 namespace OtokatariBackend.Controllers.Users
 {
+    [EnableCors("AllowAll")]
     [Route("user/profile")]
     [ApiController]
     public class ProfileController : ControllerBase

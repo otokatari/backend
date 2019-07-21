@@ -14,9 +14,6 @@ namespace OtokatariBackend.Persistence.MongoDB.Model
         [BsonElement("time")]
         public int Time { get; set; }
 
-        [BsonElement("like")]
-        public int Like { get; set; }
-
         [BsonElement("userid")]
         public string Userid { get; set; }
 

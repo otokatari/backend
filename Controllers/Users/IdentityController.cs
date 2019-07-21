@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using OtokatariBackend.Model.Request.Users;
 using OtokatariBackend.Model.Response;
@@ -8,6 +9,7 @@ using OtokatariBackend.Services.Users;
 
 namespace OtokatariBackend.Controllers.Users
 {
+    [EnableCors("AllowAll")]
     [Route("user/auth")]
     [ApiController]
     public class IdentityController : ControllerBase

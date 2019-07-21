@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using OtokatariBackend.Model.Request.Music;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace OtokatariBackend.Controllers.Music
 {
+    [EnableCors("AllowAll")]
     [Route("music/playlist")]
     [ApiController]
     [Authorize]
