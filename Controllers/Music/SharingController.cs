@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,9 @@ namespace OtokatariBackend.Controllers.Music
     public class SharingController : ControllerBase
     {
         private readonly StaticFilePathResovler _files;
-        private readonly SharingDbOperator _sharing;
+        private readonly SharingServices _sharing;
         private readonly ILogger<SharingController> _logger;
-        public SharingController(SharingDbOperator sharing,
+        public SharingController(SharingServices sharing,
                                 ILogger<SharingController> logger,
                                 IOptions<StaticFilePathResovler> files)
         {
@@ -44,7 +45,7 @@ namespace OtokatariBackend.Controllers.Music
         [ValidateJwtTokenActive]
         public async Task<JsonResult> GetMusicSharingComments([FromQuery] string musicid)
         {
-            return new JsonResult(await _sharing.GetMusicCommentsAsync(musicid));
+            return new JsonResult(await _sharing.GetMusicSharingComments(musicid));
         }
 
 
@@ -53,7 +54,7 @@ namespace OtokatariBackend.Controllers.Music
         [ValidateJwtTokenActive]
         public async Task<JsonResult> PostSharingComment([FromQuery] string musicid, [FromBody]SharingComments comment)
         {
-            return new JsonResult(await _sharing.CreateMusicSharingComment(musicid, comment));
+            return new JsonResult(await _sharing.PostSharingComment(musicid, comment));
         }
 
         [HttpPost("replycomment")]
@@ -61,7 +62,7 @@ namespace OtokatariBackend.Controllers.Music
         [ValidateJwtTokenActive]
         public async Task<JsonResult> ReplySharingComment([FromQuery] string musicid, [FromQuery] string commentid, [FromBody] ReplyComments comments)
         {
-            return new JsonResult(await _sharing.ReplyMusicSharingComment(musicid, ObjectId.Parse(commentid), comments));
+            return new JsonResult(await _sharing.ReplySharingComment(musicid, commentid, comments));
         }
 
         public void PostSharingPhotos()
@@ -72,10 +73,14 @@ namespace OtokatariBackend.Controllers.Music
         [HttpGet("likecomment")]
         [Authorize]
         [ValidateJwtTokenActive]
-        public async Task<JsonResult> LikeComment([FromQuery]string musicid, [FromQuery]string commentid)
+        public async Task<JsonResult> LikeComment([FromQuery] bool like, [FromQuery]string musicid, [FromQuery]string commentid)
         {
             string UserID = User.Claims.ToList()[0].Value;
-            return new JsonResult(await _sharing.LikeOneComment(musicid, UserID, ObjectId.Parse(commentid)));
+            if(like) 
+            {
+                return new JsonResult(await _sharing.LikeComment(musicid,commentid,UserID));
+            }
+            return new JsonResult(await _sharing.UnLikeComment(musicid,commentid,UserID));
         }
     }
 }

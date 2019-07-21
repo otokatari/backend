@@ -26,11 +26,6 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.Sharing
 
         public async Task<bool> CreateMusicSharingComment(string Musicid, SharingComments comments)
         {
-            // fix-around array create.
-
-            comments.Comments = new ReplyComments[0];
-
-            comments._id = ObjectId.GenerateNewId();
             var MusicCommentRootExistsFilter = Builders<MusicComments>.Filter.Eq(r => r.Musicid, Musicid);
             var finder = await _context.MusicComments.FindAsync(MusicCommentRootExistsFilter);
             var music = await finder.FirstOrDefaultAsync();
@@ -78,9 +73,20 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.Sharing
         public async Task<bool> LikeOneComment(string Musicid,string LikeUserid,ObjectId Commentid)
         {
             var filter = Builders<MusicComments>.Filter;
-            var filters = filter.Eq(r => r.Musicid,Musicid) & filter.Eq("comments._id",Commentid);
+            var filters = filter.Eq(r => r.Musicid,Musicid) & filter.Eq("comments._id",Commentid) & !filter.AnyEq("comments.like",LikeUserid);
 
             var pusher = Builders<MusicComments>.Update.Push("comments.$[].like",LikeUserid);
+
+            var updated = await _context.MusicComments.UpdateOneAsync(filters,pusher);
+            return updated.ModifiedCount == 1;
+        }
+
+        public async Task<bool> UnLikeOneComment(string Musicid,string LikeUserid,ObjectId Commentid)
+        {
+            var filter = Builders<MusicComments>.Filter;
+            var filters = filter.Eq(r => r.Musicid,Musicid) & filter.Eq("comments._id",Commentid) & filter.AnyEq("comments.like",LikeUserid);;
+
+            var pusher = Builders<MusicComments>.Update.Pull("comments.$[].like",LikeUserid);
 
             var updated = await _context.MusicComments.UpdateOneAsync(filters,pusher);
             return updated.ModifiedCount == 1;
