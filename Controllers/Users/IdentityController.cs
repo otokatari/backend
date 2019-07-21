@@ -9,7 +9,6 @@ using OtokatariBackend.Services.Users;
 
 namespace OtokatariBackend.Controllers.Users
 {
-    [EnableCors("AllowAll")]
     [Route("user/auth")]
     [ApiController]
     public class IdentityController : ControllerBase

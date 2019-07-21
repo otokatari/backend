@@ -14,7 +14,6 @@ using OtokatariBackend.Services.Token;
 
 namespace OtokatariBackend.Controllers.Music
 {
-    [EnableCors("AllowAll")]
     [Route("music/tracking")]
     [ApiController]
     [Authorize]

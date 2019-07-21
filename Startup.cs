@@ -47,23 +47,12 @@ namespace OtokatariBackend
             // Configure HttpContextAccessor that can get http request & response context in filter.
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    builder =>
-                    {
-                        builder
-                            .AllowAnyOrigin() 
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials();
-                    });
-            });
+            services.AddCors();
 
             // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
             services.Configure<StaticFilePathResovler>(Configuration.GetSection("StaticFilesStorePath"));
-            
+
             services.AddSingleton<JwtManager>();
             services.AddSingleton<TokenManager>();
 
@@ -127,7 +116,11 @@ namespace OtokatariBackend
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCors("AllowAll");
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
             app.UseAuthentication();
             app.UseMvc();
         }

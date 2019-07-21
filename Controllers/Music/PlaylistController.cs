@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace OtokatariBackend.Controllers.Music
 {
-    [EnableCors("AllowAll")]
     [Route("music/playlist")]
     [ApiController]
     [Authorize]

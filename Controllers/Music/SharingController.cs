@@ -14,7 +14,6 @@ using OtokatariBackend.Utils;
 
 namespace OtokatariBackend.Controllers.Music
 {
-    [EnableCors("AllowAll")]
     [Route("music/sharing")]
     [ApiController]
     public class SharingController : ControllerBase

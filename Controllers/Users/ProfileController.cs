@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Cors;
 
 namespace OtokatariBackend.Controllers.Users
 {
-    [EnableCors("AllowAll")]
     [Route("user/profile")]
     [ApiController]
     public class ProfileController : ControllerBase
