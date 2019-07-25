@@ -12,6 +12,7 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary
         private readonly MongoClient _client;
         private readonly MongoContext _context;
         private readonly ILogger<MusicLibraryOperator> _logger;
+
         private readonly static object MusicLibraryLocker = new object();
 
         public MusicLibraryOperator(MongoClient client, MongoContext context, ILogger<MusicLibraryOperator> logger)
