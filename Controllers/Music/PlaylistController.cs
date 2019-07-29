@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using OtokatariBackend.Model.Request.Music;
+using OtokatariBackend.Model.Response;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using OtokatariBackend.Services.Music;
 using OtokatariBackend.Services.Token;
@@ -15,7 +15,7 @@ namespace OtokatariBackend.Controllers.Music
     [ApiController]
     [Authorize]
     [ValidateJwtTokenActive]
-    public class PlaylistController : ControllerBase
+    public class PlaylistController : ControllerBase 
     {
         private readonly PlaylistServices _playlist;
 
@@ -34,14 +34,30 @@ namespace OtokatariBackend.Controllers.Music
         public async Task<JsonResult> AddSong([FromQuery] string playlistid,[FromBody] SimpleMusic music)
         {
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
-            return new JsonResult(await _playlist.AddSong(ClaimsUserID, ObjectId.Parse(playlistid), music));
+            playlistid = playlistid.Trim();
+            try
+            {
+                return new JsonResult(await _playlist.AddSong(ClaimsUserID, ObjectId.Parse(playlistid), music));
+            }
+            catch (System.FormatException fmt)
+            {
+                return new JsonResult(new CommonResponse{ StatusCode = -1002 });
+            }
         }
 
         [HttpGet("deletesong")]
         public async Task<JsonResult> DeleteSong([FromQuery] string playlistid, [FromQuery] string musicid)
         {
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
-            return new JsonResult(await _playlist.DeleteSong(ObjectId.Parse(playlistid), ClaimsUserID,  musicid));
+            playlistid = playlistid.Trim();
+            try
+            {
+                return new JsonResult(await _playlist.DeleteSong(ObjectId.Parse(playlistid), ClaimsUserID, musicid));
+            }
+            catch (System.FormatException fmt)
+            {
+                return new JsonResult(new CommonResponse { StatusCode = -1002 });
+            }
 
         }
         [HttpPost("createlist")]
@@ -54,7 +70,15 @@ namespace OtokatariBackend.Controllers.Music
         public async Task<JsonResult> DeletePlaylist([FromQuery] string playlistid)
         {
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
-            return new JsonResult(await _playlist.DeletePlaylists(ObjectId.Parse(playlistid),ClaimsUserID));
+             playlistid = playlistid.Trim();
+            try
+            {
+                return new JsonResult(await _playlist.DeletePlaylists(ObjectId.Parse(playlistid), ClaimsUserID));
+            }
+            catch (System.FormatException fmt)
+            {
+                return new JsonResult(new CommonResponse { StatusCode = -1002 });
+            }
         }
     }
 }

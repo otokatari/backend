@@ -20,7 +20,6 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO
             SystemMusicLibrary = db.GetCollection<SystemMusicLibrary>("SystemMusicLibrary", new MongoCollectionSettings { AssignIdOnInsert = true });
             UserBehaviour = db.GetCollection<UserBehaviour>("UserBehaviour", new MongoCollectionSettings { AssignIdOnInsert = true });
         }
-
     }
 
     public static class MongoClientExtension

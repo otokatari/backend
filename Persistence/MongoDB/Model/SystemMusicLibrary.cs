@@ -11,7 +11,5 @@ namespace OtokatariBackend.Persistence.MongoDB.Model
         [BsonElement("bpm")]
         public double Bpm { get; set; }
 
-
-
     }
 }

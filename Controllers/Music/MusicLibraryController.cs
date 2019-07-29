@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using OtokatariBackend.Persistence.MongoDB.DAO;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using OtokatariBackend.Services.Music;
 using OtokatariBackend.Services.Token;
