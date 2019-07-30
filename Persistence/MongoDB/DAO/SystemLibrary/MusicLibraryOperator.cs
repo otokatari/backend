@@ -30,7 +30,7 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary
                 {
                     return SaveNewMusicRecord(music.ToMusicLibrary());
                 }
-                return true;
+                return false;
             }
         }
 

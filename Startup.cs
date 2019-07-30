@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,12 +11,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using OtokatariBackend.Model.DependencyInjection.Databases;
+using OtokatariBackend.Model.DependencyInjection.MessageQueue;
 using OtokatariBackend.Model.DependencyInjection.RSAKey;
 using OtokatariBackend.Model.DependencyInjection.Token;
 using OtokatariBackend.Persistence.MongoDB.DAO;
 using OtokatariBackend.Persistence.MongoDB.DependencyInjection;
 using OtokatariBackend.Persistence.MySQL.DAO;
 using OtokatariBackend.Services;
+using OtokatariBackend.Services.Music;
 using OtokatariBackend.Services.Token;
 using OtokatariBackend.Services.Users.UIDWorker;
 using OtokatariBackend.Utils;
@@ -52,9 +53,10 @@ namespace OtokatariBackend
             // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
             services.Configure<StaticFilePathResovler>(Configuration.GetSection("StaticFilesStorePath"));
-
+            services.Configure<RabbitMQConfiguration>(Configuration.GetSection("RabbitMQServer"));
             services.AddSingleton<JwtManager>();
             services.AddSingleton<TokenManager>();
+
 
 
             // Configure databases connection.
@@ -72,7 +74,9 @@ namespace OtokatariBackend
             services.AddSingleton<IdWorker>();
             services.AddAllServices<IOtokatariService>();
             services.AddAllServices<IOtokatariDbOperator>();
+            services.AddSingleton<AnalyzerQueue>();
 
+            
             // Configure access controller.
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)//配置JWT服务
                .AddJwtBearer(options =>
