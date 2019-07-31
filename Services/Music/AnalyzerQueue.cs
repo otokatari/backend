@@ -29,8 +29,10 @@ namespace OtokatariBackend.Services.Music
             var host = options.Value.HostName;
 
             QueueName = options.Value.QueueName;
+            var userName = options.Value.UserName;
+            var password = options.Value.Password;
 
-            var factory = new ConnectionFactory { HostName = host };
+            var factory = new ConnectionFactory { HostName = host, UserName = userName, Password = password };
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
 
