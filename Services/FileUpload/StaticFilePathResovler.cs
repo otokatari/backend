@@ -12,16 +12,5 @@ namespace OtokatariBackend.Utils
 
         public string GetAvatar() => Path.Combine(root, avatar);
         public string GetSharing() => Path.Combine(root, sharing);
-        public StaticFilePathResovler()
-        {
-            var dirs = new[] { root, GetAvatar(), GetSharing() };
-            foreach (var dir in dirs)
-            {
-                var DirInfo = new DirectoryInfo(dir);
-                if(!DirInfo.Exists)
-                    DirInfo.Create();
-                System.Console.WriteLine($"Static file folder {dir} loaded");
-            }
-        }
     }
 }

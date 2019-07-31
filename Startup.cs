@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using OtokatariBackend.Model.DependencyInjection.Databases;
@@ -53,10 +55,10 @@ namespace OtokatariBackend
             // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
             services.Configure<StaticFilePathResovler>(Configuration.GetSection("StaticFilesStorePath"));
+            EnsureStaticFilePathValid(services);
             services.Configure<RabbitMQConfiguration>(Configuration.GetSection("RabbitMQServer"));
             services.AddSingleton<JwtManager>();
             services.AddSingleton<TokenManager>();
-
 
 
             // Configure databases connection.
@@ -127,6 +129,19 @@ namespace OtokatariBackend
                 .AllowCredentials());
             app.UseAuthentication();
             app.UseMvc();
+        }
+
+        public void EnsureStaticFilePathValid(IServiceCollection services)
+        {
+            var resovler = services.BuildServiceProvider().GetRequiredService<IOptions<StaticFilePathResovler>>().Value;
+            var dirs = new [] {resovler.root,resovler.GetAvatar(),resovler.GetSharing()};
+            foreach (var dir in dirs)
+            {
+                var DirInfo = new DirectoryInfo(dir);
+                if(!DirInfo.Exists)
+                    DirInfo.Create();
+                System.Console.WriteLine($"Static file path {dir} loaded");
+            }
         }
     }
 }
