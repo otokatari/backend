@@ -1,5 +1,5 @@
 using System.IO;
-using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace OtokatariBackend.Utils
 {
@@ -12,5 +12,12 @@ namespace OtokatariBackend.Utils
 
         public string GetAvatar() => Path.Combine(root, avatar);
         public string GetSharing() => Path.Combine(root, sharing);
+
+        public static string GetFileExtension(string fileName)
+        {
+            var parts = fileName.Split(".");
+            if (parts.Length < 2) return "jpg";
+            return parts.Last();
+        }
     }
 }

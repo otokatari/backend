@@ -1,12 +1,18 @@
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using OtokatariBackend.Model.Response;
+using OtokatariBackend.Model.Response.Sharing;
 using OtokatariBackend.Persistence.MongoDB.DAO.Sharing;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using OtokatariBackend.Services.Music;
@@ -19,7 +25,7 @@ namespace OtokatariBackend.Controllers.Music
     [ApiController]
     public class SharingController : ControllerBase
     {
-        private readonly StaticFilePathResovler _files;
+        private readonly StaticFilePathResovler _resolver;
         private readonly SharingServices _sharing;
         private readonly ILogger<SharingController> _logger;
         public SharingController(SharingServices sharing,
@@ -28,7 +34,7 @@ namespace OtokatariBackend.Controllers.Music
         {
             _sharing = sharing;
             _logger = logger;
-            _files = files.Value;
+            _resolver = files.Value;
         }
 
         /*
@@ -63,9 +69,46 @@ namespace OtokatariBackend.Controllers.Music
             return new JsonResult(await _sharing.ReplySharingComment(musicid, commentid, comments));
         }
 
-        public void PostSharingPhotos()
-        {
 
+        [HttpPost("postphotos")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public async Task<CommonResponse> PostSharingPhotos([Required] string musicid, [Required] IList<IFormFile> files)
+        {
+            if(files.Count == 0) return new CommonResponse { StatusCode = -2 }; // Didn't place files into form-data correctly.
+            var sharing = _resolver.GetSharing();
+            var folderPath = Path.Combine(sharing, musicid);
+            var folderInfo = new DirectoryInfo(folderPath);
+            if (!folderInfo.Exists) folderInfo.Create();
+            var received = new List<string>();
+            var receivedFullPath = new List<string>();
+            try
+            {
+                foreach (var file in files)
+                {
+                    var fileName = $"{Guid.NewGuid().ToString()}.{StaticFilePathResovler.GetFileExtension(file.FileName)}";
+                    var filePath = Path.Combine(folderPath, fileName);
+                    using (var fs = System.IO.File.Create(filePath))
+                    {
+                        await file.OpenReadStream().CopyToAsync(fs);
+                    }
+                    received.Add(fileName);
+                    receivedFullPath.Add(filePath);
+                }
+                return new UploadPostPhotosResponse { StatusCode = 0, ReceivedFiles = received };
+            }
+            
+            catch (Exception ex)
+            {
+                _logger.LogError($"Write file error: {ex.Message} {ex.StackTrace}");
+                // Regards this upload as failed. Need to free up all space taken up by this failed upload.
+                foreach (var filePath in receivedFullPath)
+                {
+                    var file = new FileInfo(filePath);
+                    if(file.Exists) file.Delete();
+                }
+                return new CommonResponse { StatusCode = -1 }; // Server-side error.
+            }
         }
 
         [HttpGet("likecomment")]

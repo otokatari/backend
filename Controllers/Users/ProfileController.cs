@@ -105,7 +105,9 @@ namespace OtokatariBackend.Controllers.Users
         {
             var path = Path.Combine(_resolver.GetAvatar(), avatar);
             var mime = $"image/{avatar.Split(".")[1]}";
-            return PhysicalFile(path, mime);
+            if(new FileInfo(path).Exists)
+                return PhysicalFile(path, mime);
+            return NotFound();
         }
 
 
@@ -123,7 +125,6 @@ namespace OtokatariBackend.Controllers.Users
             var UserID = User.Claims.ToList()[0].Value;
             try
             {
-
                 var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), 70);
                 var reader = new MultipartReader(boundary, Request.Body);
                 var section = await reader.ReadNextSectionAsync();
@@ -156,7 +157,6 @@ namespace OtokatariBackend.Controllers.Users
                             }
                         }
                     }
-
                     section = await reader.ReadNextSectionAsync();
                 }
 

@@ -4,6 +4,8 @@ using OtokatariBackend.Persistence.MongoDB.DAO;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using System.Threading.Tasks;
 using OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace OtokatariBackend.Services.Music
 {
@@ -14,15 +16,20 @@ namespace OtokatariBackend.Services.Music
         private readonly MusicLibraryOperator _musiclib;
         private readonly AnalyzerQueue _queue;
 
+        private static bool EnableMusicAnalyzer = false;
+
         public BehaviourServices(MongoContext context,
                                 MusicLibraryOperator musiclib,
                                 ILogger<BehaviourServices> logger,
-                                AnalyzerQueue queue)
+                                AnalyzerQueue queue,
+                                [FromServices] IConfiguration  config)
         {
             _context = context;
             _logger = logger;
             _musiclib = musiclib;
             _queue = queue;
+            EnableMusicAnalyzer = config.GetValue<bool>("EnableMusicAnalyzer");
+            _logger.LogInformation($"MusicAnalyzer status: {EnableMusicAnalyzer}");
         }
 
         public async Task<CommonResponse> ReportBehavior(UserBehaviour behaviour)
@@ -33,7 +40,7 @@ namespace OtokatariBackend.Services.Music
                 var NeedAnalysis = _musiclib.AppendMusicToLibraryIfNotExist(behaviour.Music);
                 // 如果这是一首服务器上没有的新歌，就需要进行分析.
                 
-                if(NeedAnalysis)
+                if(EnableMusicAnalyzer && NeedAnalysis)
                      _queue.SendAnalyzeMusicMessage(behaviour.Music);
             });
 
