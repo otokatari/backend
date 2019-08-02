@@ -104,10 +104,10 @@ namespace OtokatariBackend.Controllers.Users
         public IActionResult GetAvatar([FromQuery][Required] string avatar)
         {
             var path = Path.Combine(_resolver.GetAvatar(), avatar);
-            var mime = $"image/{avatar.Split(".")[1]}";
+            var ext = StaticFilePathResolver.GetFileExtension(avatar);
             var file = new FileInfo(path);
             if(file.Exists)
-                return PhysicalFile(file.FullName, mime);
+                return PhysicalFile(file.FullName, $"image/{ext}");
             return NotFound();
         }
 
