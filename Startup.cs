@@ -39,6 +39,8 @@ namespace OtokatariBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
+
             services
                 .AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
@@ -54,7 +56,7 @@ namespace OtokatariBackend
 
             // Configure Jwt token generator information
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtSignatureInfo"));
-            services.Configure<StaticFilePathResovler>(Configuration.GetSection("StaticFilesStorePath"));
+            services.Configure<StaticFilePathResolver>(Configuration.GetSection("StaticFilesStorePath"));
             EnsureStaticFilePathValid(services);
             services.Configure<RabbitMQConfiguration>(Configuration.GetSection("RabbitMQServer"));
             services.AddSingleton<JwtManager>();
@@ -133,7 +135,7 @@ namespace OtokatariBackend
 
         public void EnsureStaticFilePathValid(IServiceCollection services)
         {
-            var resovler = services.BuildServiceProvider().GetRequiredService<IOptions<StaticFilePathResovler>>().Value;
+            var resovler = services.BuildServiceProvider().GetRequiredService<IOptions<StaticFilePathResolver>>().Value;
             var dirs = new [] {resovler.root,resovler.GetAvatar(),resovler.GetSharing()};
             foreach (var dir in dirs)
             {

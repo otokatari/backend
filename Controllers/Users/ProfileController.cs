@@ -29,13 +29,13 @@ namespace OtokatariBackend.Controllers.Users
         private readonly ProfileService _profile;
         private readonly UsersDbOperator _profDb;
 
-        private readonly StaticFilePathResovler _resolver;
+        private readonly StaticFilePathResolver _resolver;
 
         private readonly ILogger<ProfileController> _logger;
 
         public ProfileController(ProfileService profile,
                                 UsersDbOperator profDb,
-                                IOptions<StaticFilePathResovler> resolver,
+                                IOptions<StaticFilePathResolver> resolver,
                                 ILogger<ProfileController> logger)
         {
             _profile = profile;
@@ -105,8 +105,9 @@ namespace OtokatariBackend.Controllers.Users
         {
             var path = Path.Combine(_resolver.GetAvatar(), avatar);
             var mime = $"image/{avatar.Split(".")[1]}";
-            if(new FileInfo(path).Exists)
-                return PhysicalFile(path, mime);
+            var file = new FileInfo(path);
+            if(file.Exists)
+                return PhysicalFile(file.FullName, mime);
             return NotFound();
         }
 

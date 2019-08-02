@@ -25,12 +25,12 @@ namespace OtokatariBackend.Controllers.Music
     [ApiController]
     public class SharingController : ControllerBase
     {
-        private readonly StaticFilePathResovler _resolver;
+        private readonly StaticFilePathResolver _resolver;
         private readonly SharingServices _sharing;
         private readonly ILogger<SharingController> _logger;
         public SharingController(SharingServices sharing,
                                 ILogger<SharingController> logger,
-                                IOptions<StaticFilePathResovler> files)
+                                IOptions<StaticFilePathResolver> files)
         {
             _sharing = sharing;
             _logger = logger;
@@ -69,6 +69,20 @@ namespace OtokatariBackend.Controllers.Music
             return new JsonResult(await _sharing.ReplySharingComment(musicid, commentid, comments));
         }
 
+        [HttpGet("getsharingphotos")]
+        [Authorize]
+        [ValidateJwtTokenActive]
+        public IActionResult GetSharingPhotos([FromQuery][Required] string musicid, [FromQuery][Required] string photo)
+        {
+            var ext = StaticFilePathResolver.GetFileExtension(photo);
+            var filePath = Path.Combine(_resolver.GetSharing(),musicid,photo);
+            var file = new FileInfo(filePath);
+            if(file.Exists)
+            {
+                return PhysicalFile(file.FullName,$"image/{ext}");
+            }
+            return NotFound();
+        }
 
         [HttpPost("postphotos")]
         [Authorize]
@@ -86,7 +100,7 @@ namespace OtokatariBackend.Controllers.Music
             {
                 foreach (var file in files)
                 {
-                    var fileName = $"{Guid.NewGuid().ToString()}.{StaticFilePathResovler.GetFileExtension(file.FileName)}";
+                    var fileName = $"{Guid.NewGuid().ToString()}.{StaticFilePathResolver.GetFileExtension(file.FileName)}";
                     var filePath = Path.Combine(folderPath, fileName);
                     using (var fs = System.IO.File.Create(filePath))
                     {

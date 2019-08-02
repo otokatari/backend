@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace OtokatariBackend.Utils
 {
-    public class StaticFilePathResovler
+    public class StaticFilePathResolver
     {
         public string root { get; set; }
         public string avatar { get; set; }
