@@ -21,6 +21,7 @@ namespace OtokatariBackend.Persistence.MongoDB.Model
         public string Name { get; set; }
 
         [BsonElement("platform")]
+        [RegularExpression("(netease|qqmusic|kugou)")]
         public string Platform { get; set; }
 
         [BsonElement("singerid")]

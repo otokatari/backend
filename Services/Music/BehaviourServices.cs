@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OtokatariBackend.Persistence.MongoDB.DAO.SystemLibrary;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using OtokatariBackend.Persistence.MongoDB.DAO.DbSingers;
 
 namespace OtokatariBackend.Services.Music
 {
@@ -14,11 +15,14 @@ namespace OtokatariBackend.Services.Music
         private readonly ILogger<BehaviourServices> _logger;
         private readonly MongoContext _context;
         private readonly MusicLibraryOperator _musiclib;
+
+        private readonly SingersDbOperator _singers;
         private readonly AnalyzerQueue _queue;
 
         private static bool EnableMusicAnalyzer = false;
 
         public BehaviourServices(MongoContext context,
+                                SingersDbOperator singers,
                                 MusicLibraryOperator musiclib,
                                 ILogger<BehaviourServices> logger,
                                 AnalyzerQueue queue,
@@ -28,6 +32,7 @@ namespace OtokatariBackend.Services.Music
             _logger = logger;
             _musiclib = musiclib;
             _queue = queue;
+            _singers = singers;
             EnableMusicAnalyzer = config.GetValue<bool>("EnableMusicAnalyzer");
             _logger.LogInformation($"MusicAnalyzer status: {EnableMusicAnalyzer}");
         }
@@ -39,9 +44,10 @@ namespace OtokatariBackend.Services.Music
             {
                 var NeedAnalysis = _musiclib.AppendMusicToLibraryIfNotExist(behaviour.Music);
                 // 如果这是一首服务器上没有的新歌，就需要进行分析.
-                
+                var music = behaviour.Music;
+                _singers.InsertNewSingerInfoToDbIfNotExists(music.Singerid,music.Platform,music.Singername);
                 if(EnableMusicAnalyzer && NeedAnalysis)
-                     _queue.SendAnalyzeMusicMessage(behaviour.Music);
+                     _queue.SendAnalyzeMusicMessage(music);
             });
 
             await _context.UserBehaviour.InsertOneAsync(behaviour);

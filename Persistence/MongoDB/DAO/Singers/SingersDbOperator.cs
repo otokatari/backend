@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -5,18 +7,50 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using OtokatariBackend.Services;
+using OtokatariBackend.Utils.TypeMerger;
 
 namespace OtokatariBackend.Persistence.MongoDB.DAO.DbSingers
 {
     public class SingersDbOperator : IOtokatariDbOperator
     {
         private readonly MongoContext _context;
-
         private readonly ILogger<SingersDbOperator> _logger;
+
+        private readonly object InsertNewSingerLock = new object();
         public SingersDbOperator(MongoContext context, ILogger<SingersDbOperator> logger)
         {
             _context = context;
             _logger = logger;
+        }
+
+        public void InsertNewSingerInfoToDbIfNotExists(string Singerid,string Platform, string SingerName)
+        {
+            var singer = new Singers
+            {
+                SingerName = SingerName.Trim()
+            };
+            switch (Platform)
+            {
+                case "netease":
+                    {
+                        if (string.IsNullOrEmpty(singer.NeteaseId))
+                            singer.NeteaseId = Singerid;
+                        break;
+                    }
+                case "kugou":
+                    {
+                        if (string.IsNullOrEmpty(singer.NeteaseId))
+                            singer.KugouId = Singerid;
+                        break;
+                    }
+                case "qqmusic":
+                    {
+                        if (string.IsNullOrEmpty(singer.NeteaseId))
+                            singer.QQMusicId = Singerid;
+                        break;
+                    }
+            }
+            UpdateSingerInfo(singer);
         }
 
         public UserSavedSingerList<Singers> GetUserSavedSingerList(string Userid)
@@ -53,8 +87,65 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.DbSingers
 
             if(!status) await session.AbortTransactionAsync();
             else await session.CommitTransactionAsync();
-            
+
             return status;
+        }
+
+
+        public Singers GetSingerInfo(string Singerid)
+        {
+            var filter = Builders<Singers>.Filter;
+            var singerIdFilter = filter.AnyEq(x => new[] { x.NeteaseId, x.KugouId, x.QQMusicId }, Singerid);
+            return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
+        }
+
+        public bool UpdateSingerInfo(Singers singerNewInfo)
+        {
+            var filter = Builders<Singers>.Filter;
+            var singerFilter = filter.Eq(r => r.SingerName,singerNewInfo.SingerName);
+
+            var updater = GetSingerUpdater(singerNewInfo);
+            var session = _context._client.StartSession();
+            session.StartTransaction();
+            var result = _context.Singers.UpdateOne(singerFilter, updater, new UpdateOptions { IsUpsert = true });
+            if(result.MatchedCount == 1 && result.ModifiedCount == 0 && result.UpsertedId == null)
+            {
+                // 不需要改动
+                _logger.LogInformation($"歌手信息: {singerNewInfo.SingerName} 不需要更新.");
+                session.CommitTransaction();
+                return true;
+            }
+            else if(result.ModifiedCount == 1 || result.UpsertedId != null)
+            {
+                // 满足条件commit.
+                _logger.LogInformation($"歌手信息: {singerNewInfo.SingerName} 成功更新.");
+                session.CommitTransaction();
+                return true;
+            }
+            // 其他条件rollback
+            _logger.LogInformation($"歌手信息: {singerNewInfo.SingerName} 错误回滚: {result}.");
+            session.AbortTransaction();
+            return false;
+        }
+
+        private List<string> SingerKnownPlatformIds(Singers s) 
+                        => (new[] { s.NeteaseId, s.KugouId, s.QQMusicId }).Where(x => !string.IsNullOrEmpty(x)).ToList();
+
+        private UpdateDefinition<Singers> GetSingerUpdater(Singers s)
+        {
+            var u = Builders<Singers>.Update;
+            var updatePipe = new List<UpdateDefinition<Singers>>();
+            if (!string.IsNullOrEmpty(s.SingerName))
+                updatePipe.Add(u.Set(r => r.SingerName, s.SingerName));
+            if (!string.IsNullOrEmpty(s.NeteaseId))
+                updatePipe.Add(u.Set(r => r.NeteaseId, s.NeteaseId));
+            if (!string.IsNullOrEmpty(s.KugouId))
+                updatePipe.Add(u.Set(r => r.KugouId, s.KugouId));
+            if (!string.IsNullOrEmpty(s.QQMusicId))
+                updatePipe.Add(u.Set(r => r.QQMusicId, s.QQMusicId));
+            if (s.Language != null)
+                updatePipe.Add(u.Set(r => r.Language, s.Language));
+            return u.Combine(updatePipe);
         }
     }
 }
