@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -92,26 +93,20 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.DbSingers
         }
 
 
-        public Singers GetSingerInfoByObjectId(ObjectId SingerObjid)
+        public Singers GetSingerInfoByObjectId(ObjectId SingerObjid) 
+                        => GetSingerInfo(f => f.Eq(x => x._id, SingerObjid));
+        public Singers GetSingerInfoByPlatformId(string Singerid) 
+                        => GetSingerInfo(f => f.AnyEq(x => new[] { x.NeteaseId, x.KugouId, x.QQMusicId }, Singerid));
+        public Singers GetSingerInfoByName(string SingerName) 
+                        => GetSingerInfo((f) => f.Eq(x => x.SingerName, SingerName));
+
+        private Singers GetSingerInfo(Func<FilterDefinitionBuilder<Singers>,FilterDefinition<Singers>> filterFunc)
         {
             var filter = Builders<Singers>.Filter;
-            var singerIdFilter = filter.Eq(x => x._id, SingerObjid);
-            return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
-        }
-        public Singers GetSingerInfoByPlatformId(string Singerid)
-        {
-            var filter = Builders<Singers>.Filter;
-            var singerIdFilter = filter.AnyEq(x => new[] { x.NeteaseId, x.KugouId, x.QQMusicId }, Singerid);
-            return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
+            var preparedFilter = filterFunc(filter);
+            return _context.Singers.Find(preparedFilter).FirstOrDefault();
         }
 
-        public Singers GetSingerInfoByName(string SingerName)
-        {
-            var filter = Builders<Singers>.Filter;
-            var singerIdFilter = filter.Eq(x => x.SingerName, SingerName);
-            return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
-        }
-        
         public bool UpdateSingerInfo(Singers singerNewInfo)
         {
             var filter = Builders<Singers>.Filter;
