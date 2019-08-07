@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using OtokatariBackend.Persistence.MongoDB.Model;
 using System.Threading.Tasks;
 
@@ -10,15 +11,23 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO
         public readonly IMongoCollection<Playlists> Playlists;
         public readonly IMongoCollection<SystemMusicLibrary> SystemMusicLibrary;
         public readonly IMongoCollection<UserBehaviour> UserBehaviour;
-        public readonly IMongoDatabase db;
-        public MongoContext(IMongoDatabase _client)
+        public readonly IMongoCollection<Singers> Singers;
+        public readonly IMongoCollection<UserSavedSingerList<ObjectId>> UserSavedSingerList;
+        
+        public readonly IMongoDatabase _db;
+        public readonly MongoClient _client;
+        public MongoContext(IMongoDatabase db, MongoClient client)
         {
-            db = _client;
+            _db = db;
+            _client = client;
+            var AssignIdOnInsert = new MongoCollectionSettings { AssignIdOnInsert = true };
             
-            MusicComments = db.GetCollection<MusicComments>("MusicComments", new MongoCollectionSettings { AssignIdOnInsert = true });
-            Playlists = db.GetCollection<Playlists>("Playlists", new MongoCollectionSettings { AssignIdOnInsert = true });
-            SystemMusicLibrary = db.GetCollection<SystemMusicLibrary>("SystemMusicLibrary", new MongoCollectionSettings { AssignIdOnInsert = true });
-            UserBehaviour = db.GetCollection<UserBehaviour>("UserBehaviour", new MongoCollectionSettings { AssignIdOnInsert = true });
+            MusicComments = _db.GetCollection<MusicComments>("MusicComments", AssignIdOnInsert);
+            Playlists = _db.GetCollection<Playlists>("Playlists", AssignIdOnInsert);
+            SystemMusicLibrary = _db.GetCollection<SystemMusicLibrary>("SystemMusicLibrary", AssignIdOnInsert);
+            UserBehaviour = _db.GetCollection<UserBehaviour>("UserBehaviour", AssignIdOnInsert);
+            Singers = _db.GetCollection<Singers>("Singers", AssignIdOnInsert);
+            UserSavedSingerList = _db.GetCollection<UserSavedSingerList<ObjectId>>("UserSavedSingerList", AssignIdOnInsert);
         }
     }
 
