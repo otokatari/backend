@@ -92,13 +92,26 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.DbSingers
         }
 
 
-        public Singers GetSingerInfo(string Singerid)
+        public Singers GetSingerInfoByObjectId(ObjectId SingerObjid)
+        {
+            var filter = Builders<Singers>.Filter;
+            var singerIdFilter = filter.Eq(x => x._id, SingerObjid);
+            return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
+        }
+        public Singers GetSingerInfoByPlatformId(string Singerid)
         {
             var filter = Builders<Singers>.Filter;
             var singerIdFilter = filter.AnyEq(x => new[] { x.NeteaseId, x.KugouId, x.QQMusicId }, Singerid);
             return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
         }
 
+        public Singers GetSingerInfoByName(string SingerName)
+        {
+            var filter = Builders<Singers>.Filter;
+            var singerIdFilter = filter.Eq(x => x.SingerName, SingerName);
+            return (_context.Singers.Find(singerIdFilter)).FirstOrDefault();
+        }
+        
         public bool UpdateSingerInfo(Singers singerNewInfo)
         {
             var filter = Builders<Singers>.Filter;
