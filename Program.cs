@@ -19,8 +19,7 @@ namespace OtokatariBackend
                 {
                     var env = hostingContext.HostingEnvironment;
                     var Home = args.Length > 0 ? "Home." : "";
-
-                    var configJson = $"appsettings.{env.EnvironmentName}.Home.json";
+                    var configJson = $"appsettings.{env.EnvironmentName}.{Home}json";
                     System.Console.WriteLine("Configuration Loaded: " + configJson);
                     config.AddJsonFile(configJson, optional: true, reloadOnChange: true);
                     config.AddEnvironmentVariables();
