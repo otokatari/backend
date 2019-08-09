@@ -21,7 +21,7 @@ namespace OtokatariBackend.Controllers.Music
             _likeSingerServices = likeSingerServices;
         }
 
-        [HttpPost("addlike")]
+        [HttpGet("addlike")]
         public async Task<JsonResult> AddLikeSinger([FromQuery] string singerid)
         {
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;

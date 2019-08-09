@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using OtokatariBackend.Persistence.MongoDB.DAO.DbSingers;
 using OtokatariBackend.Persistence.MySQL.Model;
 using OtokatariBackend.Services;
 using OtokatariBackend.Services.Users.UIDWorker;
@@ -21,11 +22,13 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
         private readonly OtokatariContext _context;
         private readonly ILogger<UsersDbOperator> _logger;
         private readonly IdWorker _uid;
-        public UsersDbOperator(OtokatariContext context, ILogger<UsersDbOperator> loggger, IdWorker uid)
+        private readonly SingersDbOperator _singer;
+        public UsersDbOperator(OtokatariContext context, ILogger<UsersDbOperator> loggger, IdWorker uid,SingersDbOperator singer)
         {
             _context = context;
             _logger = loggger;
             _uid = uid;
+            _singer = singer;
         }
 
         public UserLogin SignIn(string Identifier, string Credentials, int Type)
@@ -56,8 +59,10 @@ namespace OtokatariBackend.Persistence.MySQL.DAO.Users
                 _context.UserProfilePrivacy.Add(NewUserProfilePrivacyConfig);
 
                 int affects = await _context.SaveChangesAsync();
+
                 if (affects == 3)
                 {
+                    _singer.CreateUserSavedSingerList(userid);
                     transaction.Commit();
                     return NewUser;
                 }

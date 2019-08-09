@@ -68,11 +68,26 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.DbSingers
 
         public async Task<bool> AddLikeSinger(string Userid, ObjectId SingerObjId)
         {
-            var pusher = Builders<UserSavedSingerList<ObjectId>>.Update.Push(r => r.SavedList, SingerObjId);
+            var pusher = Builders<UserSavedSingerList<ObjectId>>.Update.AddToSet(r => r.SavedList, SingerObjId);
             var userFilter = Builders<UserSavedSingerList<ObjectId>>.Filter.Eq(r => r.Userid, Userid);
 
-            var updateResult = await _context.UserSavedSingerList.UpdateOneAsync(userFilter, pusher, new UpdateOptions { IsUpsert = true });
-            return updateResult.ModifiedCount == 1 || updateResult.UpsertedId != null;
+            var updateResult = await _context.UserSavedSingerList.UpdateOneAsync(userFilter, pusher);
+            return updateResult.ModifiedCount == 1;
+        }
+
+        public async void CreateUserSavedSingerList(string Userid)
+        {
+            if (GetUserSavedSingerList(Userid) == null)
+            {
+                var list = new UserSavedSingerList<ObjectId>
+                {
+                    Userid = Userid,
+                    SystemList = new ObjectId[0],
+                    SavedList = new ObjectId[0]
+                };
+
+                await _context.UserSavedSingerList.InsertOneAsync(list);
+            }
         }
 
         public async Task<bool> DeleteLikeSinger(string Userid,ObjectId SingerObjId)
