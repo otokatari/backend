@@ -96,7 +96,7 @@ namespace OtokatariBackend.Persistence.MongoDB.DAO.DbSingers
         public Singers GetSingerInfoByObjectId(ObjectId SingerObjid) 
                         => GetSingerInfo(f => f.Eq(x => x._id, SingerObjid));
         public Singers GetSingerInfoByPlatformId(string Singerid) 
-                        => GetSingerInfo(f => f.AnyEq(x => new[] { x.NeteaseId, x.KugouId, x.QQMusicId }, Singerid));
+                        => GetSingerInfo(f => f.Or((new[] {"NeteaseId", "KugouId", "QQMusicId" }).Select(y => f.Eq(y,Singerid))));
         public Singers GetSingerInfoByName(string SingerName) 
                         => GetSingerInfo((f) => f.Eq(x => x.SingerName, SingerName));
 
