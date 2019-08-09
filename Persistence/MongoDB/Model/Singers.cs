@@ -6,17 +6,17 @@ namespace OtokatariBackend.Persistence.MongoDB.Model
     public class Singers
     {
 
-        [BsonElement]
+        [BsonElement("_id")]
         public ObjectId _id { get; set; }
-        [BsonElement]
+        [BsonElement("SingerName")]
         public string SingerName { get; set; }
-        [BsonElement]
+        [BsonElement("Language")]
         public string[] Language { get; set; }
-        [BsonElement]
+        [BsonElement("NeteaseId")]
         public string NeteaseId { get; set; }
-        [BsonElement]
+        [BsonElement("KugouId")]
         public string KugouId { get; set; }
-        [BsonElement]
+        [BsonElement("QQMusicId")]
         public string QQMusicId { get; set; }
     }
 }

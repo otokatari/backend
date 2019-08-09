@@ -5,13 +5,13 @@ namespace OtokatariBackend.Persistence.MongoDB.Model
 {
     public class UserSavedSingerList<TList>
     {
-        [BsonElement]
+        [BsonElement("_id")]
         public ObjectId _id { get; set; }
-        [BsonElement]
+        [BsonElement("Userid")]
         public string Userid { get; set; }
-        [BsonElement]
+        [BsonElement("SavedList")]
         public TList[] SavedList { get; set; }
-        [BsonElement]
+        [BsonElement("SystemList")]
         public TList[] SystemList { get; set; }
     }
 }
