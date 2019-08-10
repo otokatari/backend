@@ -26,14 +26,10 @@ namespace OtokatariBackend.Controllers.Music
         {
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
             singerid = singerid.Trim();
-            try
-            {
-                return new JsonResult(await _likeSingerServices.AddSingerLike(ClaimsUserID, ObjectId.Parse(singerid)));
-            }
-            catch (System.FormatException fmt)
-            {
-                return new JsonResult(new CommonResponse { StatusCode = -1002 });
-            }
+
+            return new JsonResult(await _likeSingerServices.AddSingerLike(ClaimsUserID, ObjectId.Parse(singerid)));
+
+
         }
 
         [HttpGet("deletelike")]
@@ -41,14 +37,7 @@ namespace OtokatariBackend.Controllers.Music
         {
             string ClaimsUserID = User.Claims.FirstOrDefault()?.Value;
             singerid = singerid.Trim();
-            try
-            {
-                return new JsonResult(await _likeSingerServices.DeleteSingerLike(ClaimsUserID, ObjectId.Parse(singerid)));
-            }
-            catch (System.FormatException fmt)
-            {
-                return new JsonResult(new CommonResponse { StatusCode = -1002 });
-            }
+            return new JsonResult(await _likeSingerServices.DeleteSingerLike(ClaimsUserID, ObjectId.Parse(singerid)));
         }
     }
 }

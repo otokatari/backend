@@ -15,8 +15,6 @@ using System.IO;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Cors;
-using OtokatariBackend.Model.Response.Users;
 using OtokatariBackend.Persistence.MySQL.DAO.Users;
 using OtokatariBackend.Model.Request;
 

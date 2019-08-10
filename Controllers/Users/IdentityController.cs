@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using OtokatariBackend.Model.Request.Users;
 using OtokatariBackend.Model.Response;
@@ -21,7 +21,7 @@ namespace OtokatariBackend.Controllers.Users
             _token = token;
 
         }
-
+        
         [HttpPost("login")]
         public JsonResult SignIn([FromBody] SignInRequest signin)
         {

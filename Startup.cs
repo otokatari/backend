@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,9 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
+using OtokatariBackend.Middlewares;
 using OtokatariBackend.Model.DependencyInjection.Databases;
 using OtokatariBackend.Model.DependencyInjection.MessageQueue;
 using OtokatariBackend.Model.DependencyInjection.RSAKey;
@@ -80,6 +83,10 @@ namespace OtokatariBackend
             services.AddAllServices<IOtokatariDbOperator>();
             services.AddSingleton<AnalyzerQueue>();
 
+            ErrorHandlerMiddleware.Builder()
+                                .AddErrorStatusCode<FormatException>(-1002)
+                                .ConfigureErrorHandler(services);
+
             
             // Configure access controller.
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)//配置JWT服务
@@ -130,6 +137,7 @@ namespace OtokatariBackend
                 .AllowAnyHeader()
                 .AllowCredentials());
             app.UseAuthentication();
+            app.UseMiddleware<ErrorHandlerMiddleware>();
             app.UseMvc();
         }
 
@@ -142,7 +150,7 @@ namespace OtokatariBackend
                 var DirInfo = new DirectoryInfo(dir);
                 if(!DirInfo.Exists)
                     DirInfo.Create();
-                System.Console.WriteLine($"Static file path {dir} loaded");
+                System.Console.WriteLine($"Static file path {dir} loaded.");
             }
         }
     }
